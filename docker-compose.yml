@@ -23,7 +23,7 @@ services:
     # 환경 변수 설정
     environment:
       # DB 연결 (mysql-8 컨테이너 이름 사용)
-      DB_URL: jdbc:mysql://mysql-8:3306/mannal?useSSL=false&serverTimezone=Asia/Seoul&connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&allowPublicKeyRetrieval=true
+      DB_URL: jdbc:mysql://mysql-8:3306/bbangsoup?useSSL=false&serverTimezone=Asia/Seoul&connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&allowPublicKeyRetrieval=true
       DB_USERNAME: root
       DB_PASSWORD: 1234
 
