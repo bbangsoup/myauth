@@ -18,32 +18,32 @@ services:
   # ========================================
   # MySQL 데이터베이스
   # ========================================
-  mysql:
-    image: mysql:8
-    # container_name: prod-mysql
+  # mysql:
+  #  image: mysql:8
+  #  # container_name: prod-mysql
 
-    # MySQL 포트 노출 (외부 접근용 - 선택사항)
-    # ports:
-    #  - "3306:3306"
+  #  # MySQL 포트 노출 (외부 접근용 - 선택사항)
+  #  # ports:
+  #  #  - "3306:3306"
 
-    environment:
-      # Root 비밀번호 (.env 파일에서 로드)
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+  #  environment:
+  #    # Root 비밀번호 (.env 파일에서 로드)
+  #    MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
 
-      # 데이터베이스 자동 생성
-      # ⚠️ 다른 프로젝트에서 사용 시 .env 파일에서 DB_NAME 설정
-      MYSQL_DATABASE: ${DB_NAME:-bbangsoup}
+  #    # 데이터베이스 자동 생성
+  #    # ⚠️ 다른 프로젝트에서 사용 시 .env 파일에서 DB_NAME 설정
+  #    MYSQL_DATABASE: ${DB_NAME:-bbangsoup}
 
-      # 시간대 설정
-      TZ: Asia/Seoul
+  #    # 시간대 설정
+  #    TZ: Asia/Seoul
 
-    # Docker 네임드 볼륨 사용 (데이터 영구 보존)
-    volumes:
-      - prod-mysql-data:/var/lib/mysql
+  #  # Docker 네임드 볼륨 사용 (데이터 영구 보존)
+  #  volumes:
+  #    - prod-mysql-data:/var/lib/mysql
 
     # 독립적인 네트워크에 연결
-    networks:
-      - prod-network
+  #  networks:
+  #    - prod-network
 
     # ========================================
     # MySQL 헬스체크 설정
