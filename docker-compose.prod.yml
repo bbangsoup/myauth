@@ -23,8 +23,8 @@ services:
     # container_name: prod-mysql
 
     # MySQL 포트 노출 (외부 접근용 - 선택사항)
-    ports:
-      - "3306:3306"
+    # ports:
+    #  - "3306:3306"
 
     environment:
       # Root 비밀번호 (.env 파일에서 로드)
