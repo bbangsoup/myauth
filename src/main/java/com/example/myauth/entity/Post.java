@@ -108,6 +108,16 @@ public class Post {
   private Integer viewCount = 0;
 
   /**
+   * 알림글 여부
+   * - false: 일반 게시글
+   * - true: 알림글
+   */
+  @Column(name = "is_notice")
+  @ColumnDefault("false")
+  @Builder.Default
+  private Boolean isNotice = false;
+
+  /**
    * 삭제 여부 (Soft Delete)
    * - false(0): 활성 상태
    * - true(1): 삭제됨

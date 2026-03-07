@@ -101,6 +101,62 @@ public class PostService {
   }
 
   /**
+   * 알림글 작성 (이미지 없음)
+   *
+   * @param userId 작성자 ID
+   * @param request 알림글 작성 요청
+   * @return 생성된 알림글 응답
+   */
+  @Transactional
+  public PostResponse createNoticePost(Long userId, PostCreateRequest request) {
+    return createNoticePost(userId, request, null);
+  }
+
+  /**
+   * 알림글 작성 (이미지 포함)
+   *
+   * @param userId 작성자 ID
+   * @param request 알림글 작성 요청
+   * @param images 첨부 이미지 목록
+   * @return 생성된 알림글 응답
+   */
+  @Transactional
+  public PostResponse createNoticePost(Long userId, PostCreateRequest request, List<MultipartFile> images) {
+    log.info("알림글 작성 시작 - userId: {}, 이미지 개수: {}",
+        userId, images != null ? images.size() : 0);
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+    if (!canManageNotice(user)) {
+      throw new UnauthorizedAccessException("알림글 작성 권한이 없습니다.");
+    }
+
+    Post noticePost = Post.builder()
+        .user(user)
+        .content(request.getContent())
+        .visibility(Visibility.PUBLIC)
+        .isNotice(true)
+        .build();
+
+    Post savedPost = postRepository.save(noticePost);
+    Long postId = savedPost.getId();
+
+    if (images != null && !images.isEmpty()) {
+      savePostImages(savedPost, images);
+    }
+
+    hashtagService.linkHashtagsToPost(savedPost, request.getContent());
+    mentionService.processPostMentions(request.getContent(), postId, userId);
+
+    savedPost = postRepository.findNoticeByIdWithUserAndImages(postId)
+        .orElseThrow(() -> new PostNotFoundException(postId));
+
+    log.info("알림글 작성 완료 - userId: {}, postId: {}", userId, postId);
+    return PostResponse.from(savedPost);
+  }
+
+  /**
    * 게시글 이미지 저장
    */
   private void savePostImages(Post post, List<MultipartFile> images) {
@@ -239,6 +295,28 @@ public class PostService {
   }
 
   /**
+   * 알림글 상세 조회
+   *
+   * @param userId 요청 사용자 ID
+   * @param postId 알림글 ID
+   * @return 알림글 상세 응답
+   */
+  @Transactional
+  public PostResponse getNoticePost(Long userId, Long postId) {
+    log.info("알림글 상세 조회 - userId: {}, postId: {}", userId, postId);
+
+    Post post = postRepository.findNoticeByIdWithUserAndImages(postId)
+        .orElseThrow(() -> new PostNotFoundException(postId));
+
+    if (!post.getUser().getId().equals(userId) && shouldIncreaseViewCount(userId, post)) {
+      postRepository.incrementViewCount(postId);
+      post.incrementViewCount();
+    }
+
+    return PostResponse.from(post, false, false);
+  }
+
+  /**
    * 게시글 공개 범위 확인
    */
   private boolean canViewPost(Long userId, Post post) {
@@ -310,6 +388,20 @@ public class PostService {
     return getPostsByUser(userId, pageable);
   }
 
+  /**
+   * 알림글 목록 조회
+   *
+   * @param pageable 페이지 정보
+   * @return 알림글 목록 페이지
+   */
+  @Transactional(readOnly = true)
+  public Page<PostListResponse> getNoticePosts(Pageable pageable) {
+    log.info("알림글 목록 조회 - page: {}, size: {}",
+        pageable.getPageNumber(), pageable.getPageSize());
+
+    return postRepository.findNoticePosts(pageable).map(PostListResponse::from);
+  }
+
   private boolean shouldIncreaseViewCount(Long userId, Post post) {
     if (postViewRepository.existsByViewerIdAndPostId(userId, post.getId())) {
       return false;
@@ -327,5 +419,9 @@ public class PostService {
       // 동시 요청으로 유니크 키 충돌이 난 경우, 이미 조회 처리된 것으로 간주
       return false;
     }
+  }
+
+  private boolean canManageNotice(User user) {
+    return Boolean.TRUE.equals(user.getIsSuperUser()) || user.getRole() == User.Role.ROLE_ADMIN;
   }
 }

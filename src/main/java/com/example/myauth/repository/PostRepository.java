@@ -47,6 +47,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
          "WHERE p.id = :id AND p.isDeleted = false")
   Optional<Post> findByIdWithUserAndImages(@Param("id") Long id);
 
+  /**
+   * 알림글 상세 조회 (작성자 + 이미지 함께 로드)
+   * @param id 게시글 ID
+   * @return 알림글 (작성자, 이미지 포함)
+   */
+  @Query("SELECT DISTINCT p FROM Post p " +
+      "JOIN FETCH p.user " +
+      "LEFT JOIN FETCH p.images " +
+      "WHERE p.id = :id AND p.isDeleted = false AND p.isNotice = true")
+  Optional<Post> findNoticeByIdWithUserAndImages(@Param("id") Long id);
+
   // ===== 목록 조회 =====
 
   /**
@@ -68,6 +79,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
          "ORDER BY p.createdAt DESC")
   Page<Post> findByVisibilityAndIsDeletedFalse(
       @Param("visibility") Visibility visibility, Pageable pageable);
+
+  /**
+   * 알림글 목록 조회 (최신순)
+   * @param pageable 페이지 정보
+   * @return 알림글 페이지
+   */
+  @Query("SELECT p FROM Post p " +
+      "WHERE p.isDeleted = false AND p.isNotice = true " +
+      "ORDER BY p.createdAt DESC")
+  Page<Post> findNoticePosts(Pageable pageable);
 
   /**
    * 공개 게시글 목록 (작성자 정보 포함)
