@@ -15,13 +15,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
- * 게시글 서비스
- * 게시글 CRUD 및 관련 비즈니스 로직 처리
+ * ?롪퍓???룸Ь? ??類λ룴??
+ * ?롪퍓???룸Ь? CRUD ????㉱?????닷럴???곕츩 ?β돦裕뉐퐲?嶺뚳퐣瑗??
  */
 @Slf4j
 @Service
@@ -35,14 +39,14 @@ public class PostService {
   private final HashtagService hashtagService;
   private final MentionService mentionService;
 
-  // ===== 게시글 작성 =====
+  // ===== ?롪퍓???룸Ь? ??얜???=====
 
   /**
-   * 게시글 작성 (이미지 없음)
+   * ?롪퍓???룸Ь? ??얜???(????嶺뚯솘? ??怨몃쾳)
    *
-   * @param userId 작성자 ID
-   * @param request 게시글 작성 요청
-   * @return 생성된 게시글 응답
+   * @param userId ??얜????ID
+   * @param request ?롪퍓???룸Ь? ??얜?????븐슙??
+   * @return ??諛댁뎽???롪퍓???룸Ь? ??얜Ŧ堉?
    */
   @Transactional
   public PostResponse createPost(Long userId, PostCreateRequest request) {
@@ -50,47 +54,47 @@ public class PostService {
   }
 
   /**
-   * 게시글 작성 (이미지 포함)
+   * ?롪퍓???룸Ь? ??얜???(????嶺뚯솘? ????
    *
-   * @param userId 작성자 ID
-   * @param request 게시글 작성 요청
-   * @param images 첨부 이미지 목록
-   * @return 생성된 게시글 응답
+   * @param userId ??얜????ID
+   * @param request ?롪퍓???룸Ь? ??얜?????븐슙??
+   * @param images 嶺뚳퐘維? ????嶺뚯솘? 嶺뚮ㅄ維뽨빳?
+   * @return ??諛댁뎽???롪퍓???룸Ь? ??얜Ŧ堉?
    */
   @Transactional
   public PostResponse createPost(Long userId, PostCreateRequest request, List<MultipartFile> images) {
-    log.info("게시글 작성 시작 - userId: {}, 이미지 개수: {}",
+    log.info("?롪퍓???룸Ь? ??얜?????戮곗굚 - userId: {}, ????嶺뚯솘? ?띠룇裕?? {}",
         userId, images != null ? images.size() : 0);
 
-    // 1. 사용자 조회
+    // 1. ??????브퀗???
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        .orElseThrow(() -> new RuntimeException("?????? 嶺뚢돦堉??????怨룸????덈펲."));
 
-    // 2. 게시글 엔티티 생성
+    // 2. ?롪퍓???룸Ь? ??됀?????諛댁뎽
     Post post = Post.builder()
         .user(user)
         .content(request.getContent())
         .visibility(request.getVisibility())
         .build();
 
-    // 3. 게시글 저장
+    // 3. ?롪퍓???룸Ь? ????
     Post savedPost = postRepository.save(post);
     Long postId = savedPost.getId();
 
-    // 4. 이미지 업로드 및 저장
+    // 4. ????嶺뚯솘? ???놁Ŧ????????
     if (images != null && !images.isEmpty()) {
       savePostImages(savedPost, images);
     }
 
-    // 5. 해시태그 처리 (본문에서 해시태그 추출 및 연결)
+    // 5. ??怨룸뻣??蹂μ쟽 嶺뚳퐣瑗??(?곌랜梨뜻룇???????怨룸뻣??蹂μ쟽 ?怨뺣뾼??????⑤슡??
     hashtagService.linkHashtagsToPost(savedPost, request.getContent());
 
-    // 6. 멘션 처리 (본문에서 멘션 추출 및 저장)
+    // 6. 嶺뚮‘瑗??嶺뚳퐣瑗??(?곌랜梨뜻룇?????嶺뚮‘瑗???怨뺣뾼????????
     mentionService.processPostMentions(request.getContent(), postId, userId);
 
-    log.info("게시글 작성 완료 - postId: {}", postId);
+    log.info("?롪퍓???룸Ь? ??얜????熬곣뫁??- postId: {}", postId);
 
-    // 5. 응답 반환 (이미지 포함하여 다시 조회)
+    // 5. ??얜Ŧ堉??꾩룇瑗??(????嶺뚯솘? ?????琉우뿰 ???곕뻣 ?브퀗???
     savedPost = postRepository.findByIdWithUserAndImages(postId)
         .orElseThrow(() -> new PostNotFoundException(postId));
 
@@ -98,7 +102,7 @@ public class PostService {
   }
 
   /**
-   * 게시글 이미지 저장
+   * ?롪퍓???룸Ь? ????嶺뚯솘? ????
    */
   private void savePostImages(Post post, List<MultipartFile> images) {
     List<PostImage> postImages = new ArrayList<>();
@@ -106,14 +110,14 @@ public class PostService {
     for (int i = 0; i < images.size(); i++) {
       MultipartFile file = images.get(i);
 
-      // 이미지 업로드
+      // ????嶺뚯솘? ???놁Ŧ??
       ImageUploadResponse uploadResponse = imageStorageService.store(file);
 
-      // PostImage 엔티티 생성
+      // PostImage ??됀?????諛댁뎽
       PostImage postImage = PostImage.builder()
           .post(post)
           .imageUrl(uploadResponse.getImageUrl())
-          .thumbnailUrl(uploadResponse.getImageUrl()) // 썸네일은 추후 구현
+          .thumbnailUrl(uploadResponse.getImageUrl()) // ?筌뤾퍒???? ?怨?????뚮뿭寃?
           .sortOrder(i)
           .fileSize(uploadResponse.getFileSize().intValue())
           .mediaType(MediaType.IMAGE)
@@ -122,112 +126,113 @@ public class PostService {
       postImages.add(postImage);
     }
 
-    // 이미지 일괄 저장
+    // ????嶺뚯솘? ????깼 ????
     postImageRepository.saveAll(postImages);
-    log.info("게시글 이미지 저장 완료 - postId: {}, 이미지 개수: {}", post.getId(), postImages.size());
+    log.info("?롪퍓???룸Ь? ????嶺뚯솘? ?????熬곣뫁??- postId: {}, ????嶺뚯솘? ?띠룇裕?? {}", post.getId(), postImages.size());
   }
 
-  // ===== 게시글 수정 =====
+  // ===== ?롪퍓???룸Ь? ??瑜곸젧 =====
 
   /**
-   * 게시글 수정
+   * ?롪퍓???룸Ь? ??瑜곸젧
    *
-   * @param userId 요청 사용자 ID
-   * @param postId 게시글 ID
-   * @param request 수정 요청
-   * @return 수정된 게시글 응답
+   * @param userId ??븐슙???????ID
+   * @param postId ?롪퍓???룸Ь? ID
+   * @param request ??瑜곸젧 ??븐슙??
+   * @return ??瑜곸젧???롪퍓???룸Ь? ??얜Ŧ堉?
    */
   @Transactional
   public PostResponse updatePost(Long userId, Long postId, PostUpdateRequest request) {
-    log.info("게시글 수정 시작 - userId: {}, postId: {}", userId, postId);
+    log.info("?롪퍓???룸Ь? ??瑜곸젧 ??戮곗굚 - userId: {}, postId: {}", userId, postId);
 
-    // 1. 게시글 조회
+    // 1. ?롪퍓???룸Ь? ?브퀗???
     Post post = postRepository.findByIdWithUserAndImages(postId)
         .orElseThrow(() -> new PostNotFoundException(postId));
 
-    // 2. 권한 확인 (작성자 본인인지)
+    // 2. 雅?굝??뇡??筌먦끉逾?(??얜?????곌랜梨??筌?)
     if (!post.getUser().getId().equals(userId)) {
-      throw new UnauthorizedAccessException("게시글을 수정할 권한이 없습니다.");
+      throw new UnauthorizedAccessException("?롪퍓???룸Ь?????瑜곸젧??雅?굝??뇡????怨룸????덈펲.");
     }
 
-    // 3. 필드 업데이트 (null이 아닌 경우만)
+    // 3. ?熬곣뫀援????낆몥??袁⑤콦 (null???熬곣뫀鍮??롪퍔???彛?
     if (request.getContent() != null) {
       post.setContent(request.getContent());
 
-      // 3-1. 해시태그 업데이트
+      // 3-1. ??怨룸뻣??蹂μ쟽 ???낆몥??袁⑤콦
       hashtagService.updatePostHashtags(post, request.getContent());
 
-      // 3-2. 멘션 업데이트
+      // 3-2. 嶺뚮‘瑗?????낆몥??袁⑤콦
       mentionService.updatePostMentions(request.getContent(), postId, userId);
     }
     if (request.getVisibility() != null) {
       post.setVisibility(request.getVisibility());
     }
 
-    // 4. 저장 (DynamicUpdate로 변경된 필드만 UPDATE)
+    // 4. ????(DynamicUpdate???곌떠??롪퍔?ο쭕??熬곣뫀援←춯?UPDATE)
     post = postRepository.save(post);
 
-    log.info("게시글 수정 완료 - postId: {}", postId);
+    log.info("?롪퍓???룸Ь? ??瑜곸젧 ?熬곣뫁??- postId: {}", postId);
 
     return PostResponse.from(post);
   }
 
-  // ===== 게시글 삭제 =====
+  // ===== ?롪퍓???룸Ь? ????=====
 
   /**
-   * 게시글 삭제 (Soft Delete)
+   * ?롪퍓???룸Ь? ????(Soft Delete)
    *
-   * @param userId 요청 사용자 ID
-   * @param postId 게시글 ID
+   * @param userId ??븐슙???????ID
+   * @param postId ?롪퍓???룸Ь? ID
    */
   @Transactional
   public void deletePost(Long userId, Long postId) {
-    log.info("게시글 삭제 시작 - userId: {}, postId: {}", userId, postId);
+    log.info("?롪퍓???룸Ь? ??????戮곗굚 - userId: {}, postId: {}", userId, postId);
 
-    // 1. 게시글 조회
+    // 1. ?롪퍓???룸Ь? ?브퀗???
     Post post = postRepository.findByIdAndIsDeletedFalse(postId)
         .orElseThrow(() -> new PostNotFoundException(postId));
 
-    // 2. 권한 확인 (작성자 본인인지)
+    // 2. 雅?굝??뇡??筌먦끉逾?(??얜?????곌랜梨??筌?)
     if (!post.getUser().getId().equals(userId)) {
-      throw new UnauthorizedAccessException("게시글을 삭제할 권한이 없습니다.");
+      throw new UnauthorizedAccessException("?롪퍓???룸Ь????????雅?굝??뇡????怨룸????덈펲.");
     }
 
-    // 3. Soft Delete 처리
+    // 3. Soft Delete 嶺뚳퐣瑗??
     post.softDelete();
     postRepository.save(post);
 
-    log.info("게시글 삭제 완료 (Soft Delete) - postId: {}", postId);
+    log.info("?롪퍓???룸Ь? ?????熬곣뫁??(Soft Delete) - postId: {}", postId);
   }
 
-  // ===== 게시글 조회 =====
+  // ===== ?롪퍓???룸Ь? ?브퀗???=====
 
   /**
-   * 게시글 상세 조회
+   * ?롪퍓???룸Ь? ??⑤㈇???브퀗???
    *
-   * @param userId 요청 사용자 ID (조회수 증가 및 좋아요/북마크 여부 확인용)
-   * @param postId 게시글 ID
-   * @return 게시글 상세 응답
+   * @param userId ??븐슙???????ID (?브퀗????嶺뚯빘鍮? ????ル열????釉뚮궙壤????? ?筌먦끉逾??
+   * @param postId ?롪퍓???룸Ь? ID
+   * @return ?롪퍓???룸Ь? ??⑤㈇????얜Ŧ堉?
    */
   @Transactional
-  public PostResponse getPost(Long userId, Long postId) {
-    log.info("게시글 상세 조회 - userId: {}, postId: {}", userId, postId);
+  public PostResponse getPost(Long userId, Long postId, HttpServletRequest request) {
+    log.info("?롪퍓???룸Ь? ??⑤㈇???브퀗???- userId: {}, postId: {}", userId, postId);
 
-    // 1. 게시글 조회 (작성자, 이미지 함께 로드)
+    // 1. ?롪퍓???룸Ь? ?브퀗???(??얜???? ????嶺뚯솘? ??節띾쐾 ?β돦裕녻キ?
     Post post = postRepository.findByIdWithUserAndImages(postId)
         .orElseThrow(() -> new PostNotFoundException(postId));
 
-    // 2. 공개 범위 확인
+    // 2. ??ㅻ????뺢퀡????筌먦끉逾?
     if (!canViewPost(userId, post)) {
-      throw new UnauthorizedAccessException("이 게시글을 볼 수 있는 권한이 없습니다.");
+      throw new UnauthorizedAccessException("???롪퍓???룸Ь??????????덈츎 雅?굝??뇡????怨룸????덈펲.");
     }
 
-    // 3. 조회수 증가 (작성자 본인이 아닌 경우에만)
-    if (!post.getUser().getId().equals(userId)) {
+    // 3. ?브퀗????嶺뚯빘鍮? (??얜?????곌랜梨????熬곣뫀鍮??롪퍔?????異?
+    if (!post.getUser().getId().equals(userId) && shouldIncreaseViewCount(request, postId)) {
       postRepository.incrementViewCount(postId);
+      post.incrementViewCount();
     }
 
-    // 4. 좋아요/북마크 여부 확인 (TODO: Phase 2-3에서 구현)
+    // 4. ??ル열????釉뚮궙壤????? ?筌먦끉逾?(TODO: Phase 2-3???????뚮뿭寃?
     boolean isLiked = false;
     boolean isBookmarked = false;
 
@@ -235,39 +240,39 @@ public class PostService {
   }
 
   /**
-   * 게시글 공개 범위 확인
+   * ?롪퍓???룸Ь? ??ㅻ????뺢퀡????筌먦끉逾?
    */
   private boolean canViewPost(Long userId, Post post) {
-    // 작성자 본인은 항상 볼 수 있음
+    // ??얜?????곌랜梨??? ??疫????????깅쾳
     if (post.getUser().getId().equals(userId)) {
       return true;
     }
 
-    // 공개 범위에 따른 접근 권한 확인
+    // ??ㅻ????뺢퀡??????⑤틲????얜∥??雅?굝??뇡??筌먦끉逾?
     switch (post.getVisibility()) {
       case PUBLIC:
         return true;
       case PRIVATE:
-        return false; // 작성자만 볼 수 있음 (위에서 이미 확인)
+        return false; // ??얜?????異????????깅쾳 (?熬곣뫖??????? ?筌먦끉逾?
       case FOLLOWERS:
-        // TODO: 팔로우 여부 확인 (Phase 3에서 구현)
-        return true; // 임시로 허용
+        // TODO: ??븐뼚夷????? ?筌먦끉逾?(Phase 3???????뚮뿭寃?
+        return true; // ?熬곣뫖六삣슖????깅뮔
       default:
         return false;
     }
   }
 
-  // ===== 게시글 목록 조회 =====
+  // ===== ?롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳??브퀗???=====
 
   /**
-   * 공개 게시글 목록 조회 (피드)
+   * ??ㅻ????롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳??브퀗???(??怨뺢덧)
    *
-   * @param pageable 페이지 정보
-   * @return 게시글 목록 페이지
+   * @param pageable ??瑜곷턄嶺뚯솘? ?筌먲퐢沅?
+   * @return ?롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳???瑜곷턄嶺뚯솘?
    */
   @Transactional(readOnly = true)
   public Page<PostListResponse> getPublicPosts(Pageable pageable) {
-    log.info("공개 게시글 목록 조회 - page: {}, size: {}",
+    log.info("??ㅻ????롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳??브퀗???- page: {}, size: {}",
         pageable.getPageNumber(), pageable.getPageSize());
 
     Page<Post> posts = postRepository.findByVisibilityAndIsDeletedFalse(
@@ -277,15 +282,15 @@ public class PostService {
   }
 
   /**
-   * 특정 사용자의 게시글 목록 조회
+   * ?獄?????????踰??롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳??브퀗???
    *
-   * @param userId 조회할 사용자 ID
-   * @param pageable 페이지 정보
-   * @return 게시글 목록 페이지
+   * @param userId ?브퀗?????????ID
+   * @param pageable ??瑜곷턄嶺뚯솘? ?筌먲퐢沅?
+   * @return ?롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳???瑜곷턄嶺뚯솘?
    */
   @Transactional(readOnly = true)
   public Page<PostListResponse> getPostsByUser(Long userId, Pageable pageable) {
-    log.info("사용자별 게시글 목록 조회 - userId: {}, page: {}",
+    log.info("?????????롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳??브퀗???- userId: {}, page: {}",
         userId, pageable.getPageNumber());
 
     Page<Post> posts = postRepository.findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(
@@ -295,14 +300,32 @@ public class PostService {
   }
 
   /**
-   * 내 게시글 목록 조회
+   * ???롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳??브퀗???
    *
-   * @param userId 로그인한 사용자 ID
-   * @param pageable 페이지 정보
-   * @return 게시글 목록 페이지
+   * @param userId ?β돦裕??筌뤿굝由??????ID
+   * @param pageable ??瑜곷턄嶺뚯솘? ?筌먲퐢沅?
+   * @return ?롪퍓???룸Ь? 嶺뚮ㅄ維뽨빳???瑜곷턄嶺뚯솘?
    */
   @Transactional(readOnly = true)
   public Page<PostListResponse> getMyPosts(Long userId, Pageable pageable) {
     return getPostsByUser(userId, pageable);
   }
+  private boolean shouldIncreaseViewCount(HttpServletRequest request, Long postId) {
+    HttpSession session = request.getSession(true);
+    @SuppressWarnings("unchecked")
+    Set<Long> viewedPostIds = (Set<Long>) session.getAttribute("viewedPostIds");
+
+    if (viewedPostIds == null) {
+      viewedPostIds = new HashSet<>();
+      session.setAttribute("viewedPostIds", viewedPostIds);
+    }
+
+    if (viewedPostIds.contains(postId)) {
+      return false;
+    }
+
+    viewedPostIds.add(postId);
+    return true;
+  }
+
 }
