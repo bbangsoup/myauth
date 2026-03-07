@@ -10,21 +10,21 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 게시글 목록 응답 DTO
- * 게시글 목록 조회 시 반환되는 간략한 정보
- * (상세 조회보다 적은 정보 포함 - 성능 최적화)
+ * 寃뚯떆湲 紐⑸줉 ?묐떟 DTO
+ * 寃뚯떆湲 紐⑸줉 議고쉶 ??諛섑솚?섎뒗 媛꾨왂???뺣낫
+ * (?곸꽭 議고쉶蹂대떎 ?곸? ?뺣낫 ?ы븿 - ?깅뒫 理쒖쟻??
  *
- * 【응답 예시】
+ * ?먯쓳???덉떆??
  * {
  *   "id": 1,
- *   "content": "오늘 맛있는 저녁...",
+ *   "content": "?ㅻ뒛 留쏆엳?????..",
  *   "thumbnailUrl": "http://...",
  *   "imageCount": 3,
  *   "likeCount": 42,
  *   "commentCount": 5,
  *   "author": {
  *     "id": 1,
- *     "name": "홍길동",
+ *     "name": "?띻만??,
  *     "profileImage": "http://..."
  *   },
  *   "createdAt": "2025-01-24T10:30:00"
@@ -37,65 +37,67 @@ import java.time.LocalDateTime;
 public class PostListResponse {
 
   /**
-   * 게시글 ID
+   * 寃뚯떆湲 ID
    */
   private Long id;
 
   /**
-   * 게시글 본문 (미리보기용 - 최대 100자)
+   * 寃뚯떆湲 蹂몃Ц (誘몃━蹂닿린??- 理쒕? 100??
    */
   private String content;
 
   /**
-   * 공개 범위
+   * 怨듦컻 踰붿쐞
    */
   private Visibility visibility;
 
   /**
-   * 대표 이미지 URL (첫 번째 이미지의 썸네일)
+   * ????대?吏 URL (泥?踰덉㎏ ?대?吏???몃꽕??
    */
   private String thumbnailUrl;
 
   /**
-   * 첨부 이미지 개수
+   * 泥⑤? ?대?吏 媛쒖닔
    */
   private Integer imageCount;
 
   /**
-   * 좋아요 수
+   * 醫뗭븘????
    */
   private Integer likeCount;
 
   /**
-   * 댓글 수
+   * ?볤? ??
    */
   private Integer commentCount;
 
+  private Integer viewCount;
+
   /**
-   * 작성자 정보
+   * ?묒꽦???뺣낫
    */
   private PostAuthorResponse author;
 
   /**
-   * 작성 일시
+   * ?묒꽦 ?쇱떆
    */
   private LocalDateTime createdAt;
 
   /**
-   * Entity → DTO 변환
+   * Entity ??DTO 蹂??
    */
   public static PostListResponse from(Post post) {
-    // 본문 미리보기 (최대 100자)
+    // 蹂몃Ц 誘몃━蹂닿린 (理쒕? 100??
     String contentPreview = post.getContent();
     if (contentPreview != null && contentPreview.length() > 100) {
       contentPreview = contentPreview.substring(0, 100) + "...";
     }
 
-    // 첫 번째 이미지의 썸네일 URL
+    // 泥?踰덉㎏ ?대?吏???몃꽕??URL
     String thumbnailUrl = null;
     if (!post.getImages().isEmpty()) {
       thumbnailUrl = post.getImages().get(0).getThumbnailUrl();
-      // 썸네일이 없으면 원본 이미지 URL 사용
+      // ?몃꽕?쇱씠 ?놁쑝硫??먮낯 ?대?吏 URL ?ъ슜
       if (thumbnailUrl == null) {
         thumbnailUrl = post.getImages().get(0).getImageUrl();
       }
@@ -109,6 +111,7 @@ public class PostListResponse {
         .imageCount(post.getImages().size())
         .likeCount(post.getLikeCount())
         .commentCount(post.getCommentCount())
+        .viewCount(post.getViewCount())
         .author(PostAuthorResponse.from(post.getUser()))
         .createdAt(post.getCreatedAt())
         .build();
