@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 /**
- * 카카오 OAuth 로그인 컨트롤러
+ * 燁삳똻萸??OAuth 嚥≪뮄????뚢뫂?껅에?살쑎
  */
 @Slf4j
 @RestController
@@ -31,30 +31,29 @@ public class KakaoAuthController {
   private final AppProperties appProperties;
 
   /**
-   * 토큰 교환 엔드포인트
-   * 세션에 저장된 로그인 결과를 가져와 refresh token 쿠키를 설정한다.
+   * ?醫뤾쿃 ?대????遺얜굡?????   * ?紐꾨?????貫留?嚥≪뮄???野껉퀗?든몴?揶쎛?紐? refresh token ?묒쥚沅롧몴???쇱젟??뺣뼄.
    */
   @PostMapping("/exchange-token")
   public ResponseEntity<ApiResponse<LoginResponse>> exchangeToken(
       HttpServletRequest request,
       HttpServletResponse response
   ) {
-    log.info("토큰 교환 요청");
+    log.info("?醫뤾쿃 ?대????遺욧퍕");
 
     HttpSession session = request.getSession(false);
     if (session == null) {
-      log.warn("세션이 없어 토큰 교환 실패");
+      log.warn("?紐꾨????곷선 ?醫뤾쿃 ?대?????쎈솭");
       return ResponseEntity
           .status(401)
-          .body(ApiResponse.error("세션이 만료되었습니다. 다시 로그인해주세요."));
+          .body(ApiResponse.error("?紐꾨??筌띾슢利??뤿???щ빍?? ??쇰뻻 嚥≪뮄??紐낅퉸雅뚯눘苑??"));
     }
 
     LoginResponse loginResponse = (LoginResponse) session.getAttribute("pendingLoginResponse");
     if (loginResponse == null) {
-      log.warn("세션에 pendingLoginResponse가 없어 토큰 교환 실패");
+      log.warn("?紐꾨??pendingLoginResponse揶쎛 ??곷선 ?醫뤾쿃 ?대?????쎈솭");
       return ResponseEntity
           .status(401)
-          .body(ApiResponse.error("로그인 정보가 없습니다. 다시 로그인해주세요."));
+          .body(ApiResponse.error("嚥≪뮄????類ｋ궖揶쎛 ??곷뮸??덈뼄. ??쇰뻻 嚥≪뮄??紐낅퉸雅뚯눘苑??"));
     }
 
     session.removeAttribute("pendingLoginResponse");
@@ -65,20 +64,18 @@ public class KakaoAuthController {
         .secure(appProperties.getCookie().isSecure())
         .path("/")
         .maxAge(7 * 24 * 60 * 60)
-        .sameSite("Lax")
-        .domain("localhost")
-        .build();
+        .sameSite("Lax").build();
 
     response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
     loginResponse.setRefreshToken(null);
 
-    log.info("토큰 교환 성공 - 사용자: {}", loginResponse.getUser().getEmail());
-    return ResponseEntity.ok(ApiResponse.success("토큰 교환 성공", loginResponse));
+    log.info("?醫뤾쿃 ?대????源껊궗 - ????? {}", loginResponse.getUser().getEmail());
+    return ResponseEntity.ok(ApiResponse.success("?醫뤾쿃 ?대????源껊궗", loginResponse));
   }
 
   /**
-   * 카카오 로그인 시작
+   * 燁삳똻萸??嚥≪뮄?????뽰삂
    */
   @GetMapping("/login")
   public void kakaoLogin(
@@ -86,28 +83,27 @@ public class KakaoAuthController {
       HttpSession session,
       HttpServletResponse response
   ) throws IOException {
-    log.info("카카오 로그인 요청 - redirectUrl: {}", redirectUrl);
+    log.info("燁삳똻萸??嚥≪뮄????遺욧퍕 - redirectUrl: {}", redirectUrl);
 
     if (redirectUrl != null && !redirectUrl.isBlank()) {
       session.setAttribute("kakaoRedirectUrl", redirectUrl);
-      log.info("프론트 redirectUrl을 세션에 저장: {}", redirectUrl);
+      log.info("?袁⑥쨴??redirectUrl???紐꾨?????? {}", redirectUrl);
     }
 
     String authorizationUrl = kakaoOAuthService.getAuthorizationUrl();
-    log.info("카카오 인증 페이지로 리다이렉트: {}", authorizationUrl);
+    log.info("燁삳똻萸???紐꾩쵄 ??륁뵠筌왖嚥??귐됰뼄????? {}", authorizationUrl);
     response.sendRedirect(authorizationUrl);
   }
 
   /**
-   * 카카오 OAuth 콜백 처리
-   */
+   * 燁삳똻萸??OAuth ?꾩뮆媛?筌ｌ꼶??   */
   @GetMapping("/callback")
   public void kakaoCallback(
       @RequestParam String code,
       HttpServletRequest request,
       HttpServletResponse response
   ) throws IOException {
-    log.info("카카오 로그인 콜백 - code 수신");
+    log.info("燁삳똻萸??嚥≪뮄????꾩뮆媛?- code ??뤿뻿");
 
     try {
       HttpSession session = request.getSession(false);
@@ -117,18 +113,18 @@ public class KakaoAuthController {
         frontendRedirectUrl = (String) session.getAttribute("kakaoRedirectUrl");
         if (frontendRedirectUrl != null) {
           session.removeAttribute("kakaoRedirectUrl");
-          log.info("세션에서 redirectUrl 복원: {}", frontendRedirectUrl);
+          log.info("?紐꾨?癒?퐣 redirectUrl 癰귣벊?? {}", frontendRedirectUrl);
         }
       }
 
       if (frontendRedirectUrl == null || frontendRedirectUrl.isBlank()) {
         frontendRedirectUrl = appProperties.getOauth().getKakaoRedirectUrl();
-        log.info("세션 값이 없어 기본 redirectUrl 사용: {}", frontendRedirectUrl);
+        log.info("?紐꾨?揶쏅?????곷선 疫꿸퀡??redirectUrl ???? {}", frontendRedirectUrl);
       }
 
       boolean isWebClient = ClientTypeDetector.isWebClient(request);
       String clientType = ClientTypeDetector.getClientTypeString(request);
-      log.info("감지된 클라이언트 타입: {}", clientType);
+      log.info("揶쏅Ŋ????????곷섧?????? {}", clientType);
 
       KakaoOAuthDto.TokenResponse tokenResponse = kakaoOAuthService.getAccessToken(code);
       KakaoOAuthDto.UserInfoResponse kakaoUserInfo = kakaoOAuthService.getUserInfo(tokenResponse.getAccessToken());
@@ -141,11 +137,9 @@ public class KakaoAuthController {
             .secure(appProperties.getCookie().isSecure())
             .path("/")
             .maxAge(7 * 24 * 60 * 60)
-            .sameSite("Lax")
-            .domain("localhost")
-            .build();
+            .sameSite("Lax").build();
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-        log.info("웹 로그인 refreshToken 쿠키 설정 완료");
+        log.info("??嚥≪뮄???refreshToken ?묒쥚沅???쇱젟 ?袁⑥┷");
 
         String userJson = String.format(
             "{\"id\":%d,\"email\":\"%s\",\"name\":\"%s\",\"profileImage\":%s}",
@@ -165,14 +159,14 @@ public class KakaoAuthController {
             encodedUser
         );
 
-        log.info("프론트로 리다이렉트: {}", frontendRedirectUrl);
+        log.info("?袁⑥쨴?紐껋쨮 ?귐됰뼄????? {}", frontendRedirectUrl);
         response.sendRedirect(successRedirectUrl);
       } else {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         String jsonResponse = String.format(
-            "{\"success\":true,\"message\":\"카카오 로그인 성공\",\"data\":{\"accessToken\":\"%s\",\"refreshToken\":\"%s\",\"user\":{\"id\":%d,\"email\":\"%s\",\"name\":\"%s\"}}}",
+            "{\"success\":true,\"message\":\"燁삳똻萸??嚥≪뮄????源껊궗\",\"data\":{\"accessToken\":\"%s\",\"refreshToken\":\"%s\",\"user\":{\"id\":%d,\"email\":\"%s\",\"name\":\"%s\"}}}",
             loginResponse.getAccessToken(),
             loginResponse.getRefreshToken(),
             loginResponse.getUser().getId(),
@@ -182,10 +176,10 @@ public class KakaoAuthController {
         response.getWriter().write(jsonResponse);
       }
 
-      log.info("카카오 로그인 성공: {}, 클라이언트: {}", loginResponse.getUser().getEmail(), clientType);
+      log.info("燁삳똻萸??嚥≪뮄????源껊궗: {}, ?????곷섧?? {}", loginResponse.getUser().getEmail(), clientType);
 
     } catch (Exception e) {
-      log.error("카카오 로그인 실패: {}", e.getMessage(), e);
+      log.error("燁삳똻萸??嚥≪뮄?????쎈솭: {}", e.getMessage(), e);
 
       HttpSession session = request.getSession(false);
       String errorRedirectUrl = null;
@@ -210,3 +204,5 @@ public class KakaoAuthController {
     }
   }
 }
+
+

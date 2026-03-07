@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api")  // 모든 API 엔드포인트에 /api 접두사 추가
+@RequestMapping("/api")  // 筌뤴뫀諭?API ?遺얜굡????紐꾨퓠 /api ?臾먮あ???곕떽?
 @RequiredArgsConstructor
 public class AuthController {
   private final AuthService authService;
@@ -37,49 +37,49 @@ public class AuthController {
 
 
   /**
-   * 회원가입
-   * 성공 시 201 Created 반환
-   * 실패 시 예외 발생 (GlobalExceptionHandler에서 처리)
+   * ???뜚揶쎛??
+   * ?源껊궗 ??201 Created 獄쏆꼹??
+   * ??쎈솭 ????됱뇚 獄쏆뮇源?(GlobalExceptionHandler?癒?퐣 筌ｌ꼶??
    */
   @PostMapping("/signup")
   public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequest signupRequest) {
-    log.info("다음 이메일로 회원가입 요청: {}", signupRequest.getEmail());
+    log.info("??쇱벉 ??李??곗쨮 ???뜚揶쎛???遺욧퍕: {}", signupRequest.getEmail());
 
-    // 회원가입 처리 (실패 시 예외 던짐)
+    // ???뜚揶쎛??筌ｌ꼶??(??쎈솭 ????됱뇚 ??륁춾)
     authService.registerUser(signupRequest);
 
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(ApiResponse.success("회원가입이 완료되었습니다."));
+        .body(ApiResponse.success("???뜚揶쎛??놁뵠 ?袁⑥┷??뤿???щ빍??"));
   }
 
 
   /**
-   * 로그인
-   * 성공 시 200 OK와 함께 토큰 정보 반환
-   * 실패 시 예외 발생 (GlobalExceptionHandler에서 처리)
+   * 嚥≪뮄???
+   * ?源껊궗 ??200 OK?? ??ｍ뜞 ?醫뤾쿃 ?類ｋ궖 獄쏆꼹??
+   * ??쎈솭 ????됱뇚 獄쏆뮇源?(GlobalExceptionHandler?癒?퐣 筌ｌ꼶??
    */
   @PostMapping("/old_login")
   public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
-    log.info("로그인 요청: {}", loginRequest.getEmail());
+    log.info("嚥≪뮄????遺욧퍕: {}", loginRequest.getEmail());
 
-    // 로그인 처리 (실패 시 예외 던짐)
+    // 嚥≪뮄???筌ｌ꼶??(??쎈솭 ????됱뇚 ??륁춾)
     LoginResponse loginResponse = authService.login(loginRequest);
 
-    return ResponseEntity.ok(ApiResponse.success("로그인 성공", loginResponse));
+    return ResponseEntity.ok(ApiResponse.success("嚥≪뮄????源껊궗", loginResponse));
   }
 
 
   /**
-   * 로그인 (하이브리드 방식 - 웹/모바일 구분)
+   * 嚥≪뮄???(??륁뵠?됰슢???獄쎻뫗??- ??筌뤴뫀而???닌됲뀋)
    *
-   *  Spring Security 표준 방식으로 로그인 처리
-   * 클라이언트 타입에 따라 토큰 전송 방식을 다르게 처리:
-   * - 웹 브라우저: Refresh Token을 HTTP-only 쿠키로 전송 (XSS 방어)
-   * - 모바일 앱: 모든 토큰을 JSON 응답 바디로 전송
+   *  Spring Security ??? 獄쎻뫗???곗쨮 嚥≪뮄???筌ｌ꼶??
+   * ?????곷섧??????녿퓠 ?怨뺤뵬 ?醫뤾쿃 ?袁⑸꽊 獄쎻뫗?????삘뀮野?筌ｌ꼶??
+   * - ???됰슢??怨?: Refresh Token??HTTP-only ?묒쥚沅롦에??袁⑸꽊 (XSS 獄쎻뫗堉?
+   * - 筌뤴뫀而???? 筌뤴뫀諭??醫뤾쿃??JSON ?臾먮뼗 獄쏅뗀逾믤에??袁⑸꽊
    *
-   * 성공 시 200 OK와 함께 토큰 정보 반환
-   * 실패 시 예외 발생 (GlobalExceptionHandler에서 처리)
+   * ?源껊궗 ??200 OK?? ??ｍ뜞 ?醫뤾쿃 ?類ｋ궖 獄쏆꼹??
+   * ??쎈솭 ????됱뇚 獄쏆뮇源?(GlobalExceptionHandler?癒?퐣 筌ｌ꼶??
    */
   @PostMapping("/login")
   public ResponseEntity<ApiResponse<LoginResponse>> loginEx(
@@ -87,125 +87,125 @@ public class AuthController {
       HttpServletRequest request,
       HttpServletResponse response
   ) {
-    log.info("로그인 요청 (loginEx): {}", loginRequest.getEmail());
+    log.info("嚥≪뮄????遺욧퍕 (loginEx): {}", loginRequest.getEmail());
 
-    // 1️⃣ 클라이언트 타입 감지
+    // 1?るㅄ源??????곷섧??????揶쏅Ŋ?
     boolean isWebClient = ClientTypeDetector.isWebClient(request);
     String clientType = ClientTypeDetector.getClientTypeString(request);
-    log.info("감지된 클라이언트 타입: {}", clientType);
+    log.info("揶쏅Ŋ????????곷섧?????? {}", clientType);
 
-    // 디버깅: User-Agent 정보 로깅
+    // ?遺얠쒔繹? User-Agent ?類ｋ궖 嚥≪뮄??
     ClientTypeDetector.logUserAgent(request);
 
-    // 2️⃣ 로그인 처리 (실패 시 예외 던짐)
+    // 2?るㅄ源?嚥≪뮄???筌ｌ꼶??(??쎈솭 ????됱뇚 ??륁춾)
     LoginResponse loginResponse = authService.loginEx(loginRequest);
 
-    // 3️⃣ 웹 클라이언트면 Refresh Token을 쿠키로 설정
+    // 3?るㅄ源????????곷섧?紐껁늺 Refresh Token???묒쥚沅롦에???쇱젟
     if (isWebClient) {
-      log.info("웹 클라이언트 감지 → Refresh Token을 HTTP-only 쿠키로 설정");
+      log.info("???????곷섧??揶쏅Ŋ? ??Refresh Token??HTTP-only ?묒쥚沅롦에???쇱젟");
 
-      // Refresh Token을 HTTP-only 쿠키로 설정
-      // ResponseCookie를 사용하여 SameSite와 Domain 속성 명시
-      // - SameSite=Lax: CSRF 방어 + 일반적인 웹 사용 가능
-      // - Domain=localhost: 포트 무관하게 모든 localhost에서 쿠키 공유 (localhost:5173과 localhost:9080 모두 접근 가능)
+      // Refresh Token??HTTP-only ?묒쥚沅롦에???쇱젟
+      // ResponseCookie???????뤿연 SameSite?? Domain ??욧쉐 筌뤿굞??
+      // - SameSite=Lax: CSRF 獄쎻뫗堉?+ ??곗뺘?怨몄뵥 ??????揶쎛??
+      // - Domain=localhost: ?????얜떯???띿쓺 筌뤴뫀諭?localhost?癒?퐣 ?묒쥚沅??⑤벊? (localhost:5173??localhost:9080 筌뤴뫀紐??臾롫젏 揶쎛??
       ResponseCookie refreshTokenCookie = ResponseCookie
           .from("refreshToken", loginResponse.getRefreshToken())
-          .httpOnly(true)   // JavaScript 접근 불가 (XSS 방어)
-          .secure(appProperties.getCookie().isSecure())  // 환경별 동적 설정 (개발: false, 프로덕션: true)
-          .path("/")        // 모든 경로에서 쿠키 전송
-          .maxAge(7 * 24 * 60 * 60)  // 7일 (초 단위)
-          .sameSite("Lax")  // CSRF 방어 + 일반 네비게이션에서 쿠키 전송 허용
-          .domain("localhost")  // 포트 무관하게 localhost 전체에서 쿠키 공유
+          .httpOnly(true)   // JavaScript ?臾롫젏 ?븍뜃? (XSS 獄쎻뫗堉?
+          .secure(appProperties.getCookie().isSecure())  // ??띻펾癰???덉읅 ??쇱젟 (揶쏆뮆而? false, ?袁⑥쨮?類ㅻ? true)
+          .path("/")        // 筌뤴뫀諭?野껋럥以?癒?퐣 ?묒쥚沅??袁⑸꽊
+          .maxAge(7 * 24 * 60 * 60)  // 7??(????μ맄)
+          .sameSite("Lax")  // CSRF 獄쎻뫗堉?+ ??곗뺘 ??삵돩野껊슣???뤿퓠???묒쥚沅??袁⑸꽊 ??됱뒠
+          
           .build();
 
-      log.info("쿠키 설정: HttpOnly=true, Secure={}, Path=/, MaxAge=7일, SameSite=Lax, Domain=localhost",
+      log.info("?묒쥚沅???쇱젟: HttpOnly=true, Secure={}, Path=/, MaxAge=7?? SameSite=Lax, Domain=localhost",
           appProperties.getCookie().isSecure());
 
       response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-      log.info("Refresh Token을 쿠키에 설정 완료");
+      log.info("Refresh Token???묒쥚沅????쇱젟 ?袁⑥┷");
 
-      // 응답 바디에서 Refresh Token 제거 (쿠키로 전송했으므로)
+      // ?臾먮뼗 獄쏅뗀逾?癒?퐣 Refresh Token ??볤탢 (?묒쥚沅롦에??袁⑸꽊??됱몵沃샕嚥?
       loginResponse.setRefreshToken(null);
-      log.info("응답 바디에서 Refresh Token 제거 (보안 강화)");
+      log.info("?臾먮뼗 獄쏅뗀逾?癒?퐣 Refresh Token ??볤탢 (癰귣똻釉?揶쏅벤??");
     } else {
-      // 4️⃣ 모바일 클라이언트면 Refresh Token을 JSON 응답에 포함
-      log.info("모바일 클라이언트 감지 → Refresh Token을 JSON 응답에 포함");
+      // 4?るㅄ源?筌뤴뫀而???????곷섧?紐껁늺 Refresh Token??JSON ?臾먮뼗????釉?
+      log.info("筌뤴뫀而???????곷섧??揶쏅Ŋ? ??Refresh Token??JSON ?臾먮뼗????釉?);
     }
 
-    // 5️⃣ 로그인 성공 응답 반환
-    log.info("로그인 성공 (loginEx): {}, 클라이언트: {}", loginRequest.getEmail(), clientType);
-    return ResponseEntity.ok(ApiResponse.success("로그인 성공", loginResponse));
+    // 5?るㅄ源?嚥≪뮄????源껊궗 ?臾먮뼗 獄쏆꼹??
+    log.info("嚥≪뮄????源껊궗 (loginEx): {}, ?????곷섧?? {}", loginRequest.getEmail(), clientType);
+    return ResponseEntity.ok(ApiResponse.success("嚥≪뮄????源껊궗", loginResponse));
   }
 
 
   /**
-   * Access Token 갱신 (하이브리드 방식 - 웹/모바일 구분)
-   * Refresh Token으로 새로운 Access Token을 발급받는다
-   * 클라이언트 타입에 따라 Refresh Token을 다른 곳에서 읽는다:
-   * - 웹 브라우저: HTTP-only 쿠키에서 Refresh Token 읽기
-   * - 모바일 앱: 요청 바디에서 Refresh Token 읽기
+   * Access Token 揶쏄퉮??(??륁뵠?됰슢???獄쎻뫗??- ??筌뤴뫀而???닌됲뀋)
+   * Refresh Token??곗쨮 ??덉쨮??Access Token??獄쏆뮄?믦쳸?낅뮉??
+   * ?????곷섧??????녿퓠 ?怨뺤뵬 Refresh Token????삘뀲 ?⑤끃肉????덈뮉??
+   * - ???됰슢??怨?: HTTP-only ?묒쥚沅?癒?퐣 Refresh Token ??꾨┛
+   * - 筌뤴뫀而???? ?遺욧퍕 獄쏅뗀逾?癒?퐣 Refresh Token ??꾨┛
    *
-   * 성공 시 200 OK와 함께 새 Access Token 반환
-   * 실패 시 예외 발생 (GlobalExceptionHandler에서 처리)
+   * ?源껊궗 ??200 OK?? ??ｍ뜞 ??Access Token 獄쏆꼹??
+   * ??쎈솭 ????됱뇚 獄쏆뮇源?(GlobalExceptionHandler?癒?퐣 筌ｌ꼶??
    */
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<TokenRefreshResponse>> refresh(
       HttpServletRequest request,
       @RequestBody(required = false) @Valid TokenRefreshRequest body
   ) {
-    log.info("Access Token 갱신 요청");
+    log.info("Access Token 揶쏄퉮???遺욧퍕");
 
-    // 1️⃣ 클라이언트 타입 감지
+    // 1?るㅄ源??????곷섧??????揶쏅Ŋ?
     boolean isWebClient = ClientTypeDetector.isWebClient(request);
     String clientType = ClientTypeDetector.getClientTypeString(request);
-    log.info("클라이언트 타입: {}", clientType);
+    log.info("?????곷섧?????? {}", clientType);
 
-    // 2️⃣ 클라이언트 타입에 따라 Refresh Token 추출
+    // 2?るㅄ源??????곷섧??????녿퓠 ?怨뺤뵬 Refresh Token ?곕뗄??
     String refreshToken;
     if (isWebClient) {
-      log.info("웹 클라이언트 → 쿠키에서 Refresh Token 읽기");
+      log.info("???????곷섧?????묒쥚沅?癒?퐣 Refresh Token ??꾨┛");
       refreshToken = extractRefreshTokenFromCookies(request);
 
-      // 쿠키에 토큰이 없는 경우, 요청 바디에서 시도 (테스트/교육용)
+      // ?묒쥚沅???醫뤾쿃????용뮉 野껋럩?? ?遺욧퍕 獄쏅뗀逾?癒?퐣 ??뺣즲 (???뮞???대Ŋ???
       if (refreshToken == null) {
-        log.warn("쿠키에 Refresh Token이 없음");
+        log.warn("?묒쥚沅??Refresh Token????곸벉");
 
-        // 테스트/교육용: 요청 바디에서 Refresh Token 읽기 시도
+        // ???뮞???대Ŋ??? ?遺욧퍕 獄쏅뗀逾?癒?퐣 Refresh Token ??꾨┛ ??뺣즲
         refreshToken = extractRefreshTokenFromBody(body);
         if (refreshToken != null) {
-          log.info("테스트/교육용: 웹 클라이언트이지만 요청 바디에서 Refresh Token 사용");
+          log.info("???뮞???대Ŋ??? ???????곷섧?紐꾩뵠筌왖筌??遺욧퍕 獄쏅뗀逾?癒?퐣 Refresh Token ????);
         } else {
           return ResponseEntity
               .status(HttpStatus.UNAUTHORIZED)
-              .body(ApiResponse.error("Refresh Token이 없습니다. 다시 로그인해주세요."));
+              .body(ApiResponse.error("Refresh Token????곷뮸??덈뼄. ??쇰뻻 嚥≪뮄??紐낅퉸雅뚯눘苑??"));
         }
       }
     } else {
-      log.info("모바일 클라이언트 → 요청 바디에서 Refresh Token 읽기");
+      log.info("筌뤴뫀而???????곷섧?????遺욧퍕 獄쏅뗀逾?癒?퐣 Refresh Token ??꾨┛");
       refreshToken = extractRefreshTokenFromBody(body);
 
-      // 요청 바디에 토큰이 없는 경우 에러 응답
+      // ?遺욧퍕 獄쏅뗀逾???醫뤾쿃????용뮉 野껋럩???癒?쑎 ?臾먮뼗
       if (refreshToken == null) {
-        log.warn("요청 바디에 Refresh Token이 없음");
+        log.warn("?遺욧퍕 獄쏅뗀逾??Refresh Token????곸벉");
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(ApiResponse.error("Refresh Token은 필수입니다."));
+            .body(ApiResponse.error("Refresh Token?? ?袁⑸땾??낅빍??"));
       }
     }
 
-    // 3️⃣ Refresh Token으로 새 Access Token 발급 (실패 시 예외 던짐)
+    // 3?るㅄ源?Refresh Token??곗쨮 ??Access Token 獄쏆뮄??(??쎈솭 ????됱뇚 ??륁춾)
     TokenRefreshResponse refreshResponse = authService.refreshAccessToken(refreshToken);
 
-    // 4️⃣ 응답 반환
-    log.info("Access Token 갱신 성공");
-    return ResponseEntity.ok(ApiResponse.success("Access Token이 갱신되었습니다", refreshResponse));
+    // 4?るㅄ源??臾먮뼗 獄쏆꼹??
+    log.info("Access Token 揶쏄퉮???源껊궗");
+    return ResponseEntity.ok(ApiResponse.success("Access Token refreshed", refreshResponse));
   }
 
   /**
-   * HTTP 쿠키에서 Refresh Token을 추출한다
+   * HTTP ?묒쥚沅?癒?퐣 Refresh Token???곕뗄???뺣뼄
    *
-   * @param request HTTP 요청 객체
-   * @return Refresh Token (없으면 null)
+   * @param request HTTP ?遺욧퍕 揶쏆빘猿?
+   * @return Refresh Token (??곸몵筌?null)
    */
   private String extractRefreshTokenFromCookies(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
@@ -215,7 +215,7 @@ public class AuthController {
 
     for (Cookie cookie : cookies) {
       if ("refreshToken".equals(cookie.getName())) {
-        log.debug("쿠키에서 Refresh Token 발견");
+        log.debug("?묒쥚沅?癒?퐣 Refresh Token 獄쏆뮄猿?);
         return cookie.getValue();
       }
     }
@@ -224,17 +224,17 @@ public class AuthController {
   }
 
   /**
-   * 요청 바디에서 Refresh Token을 추출한다
+   * ?遺욧퍕 獄쏅뗀逾?癒?퐣 Refresh Token???곕뗄???뺣뼄
    *
-   * @param body 토큰 갱신 요청 바디
-   * @return Refresh Token (없거나 유효하지 않으면 null)
+   * @param body ?醫뤾쿃 揶쏄퉮???遺욧퍕 獄쏅뗀逾?
+   * @return Refresh Token (??얘탢???醫륁뒞??? ??놁몵筌?null)
    */
   private String extractRefreshTokenFromBody(TokenRefreshRequest body) {
     if (body == null || body.getRefreshToken() == null || body.getRefreshToken().isBlank()) {
       return null;
     }
 
-    log.debug("요청 바디에서 Refresh Token 발견");
+    log.debug("?遺욧퍕 獄쏅뗀逾?癒?퐣 Refresh Token 獄쏆뮄猿?);
     return body.getRefreshToken();
   }
 }
