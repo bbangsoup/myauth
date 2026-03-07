@@ -6,8 +6,8 @@ import com.example.myauth.entity.Like;
 import com.example.myauth.entity.Post;
 import com.example.myauth.entity.User;
 import com.example.myauth.exception.CommentNotFoundException;
-import com.example.myauth.exception.DuplicateLikeException;
-import com.example.myauth.exception.LikeNotFoundException;
+// import com.example.myauth.exception.DuplicateLikeException;
+// import com.example.myauth.exception.LikeNotFoundException;
 import com.example.myauth.exception.PostNotFoundException;
 import com.example.myauth.repository.CommentRepository;
 import com.example.myauth.repository.LikeRepository;
@@ -56,10 +56,10 @@ public class LikeService {
     Post post = postRepository.findByIdAndIsDeletedFalse(postId)
         .orElseThrow(() -> new PostNotFoundException(postId));
 
-    // 2. 중복 좋아요 확인
-    if (likeRepository.existsPostLikeByUserId(userId, postId)) {
-      throw new DuplicateLikeException("이미 좋아요한 게시글입니다.");
-    }
+      // 2. 이미 좋아요 상태면 그대로 성공 반환 (멱등)
+      if (likeRepository.existsPostLikeByUserId(userId, postId)) {
+          return LikeResponse.forPost(postId, true, post.getLikeCount());
+      }
 
     // 3. 사용자 조회
     User user = userRepository.getReferenceById(userId);
@@ -94,22 +94,18 @@ public class LikeService {
     Post post = postRepository.findByIdAndIsDeletedFalse(postId)
         .orElseThrow(() -> new PostNotFoundException(postId));
 
-    // 2. 좋아요 기록 확인
-    Like like = likeRepository.findPostLikeByUserId(userId, postId)
-        .orElseThrow(() -> new LikeNotFoundException("좋아요하지 않은 게시글입니다."));
+      // 2. 좋아요 기록 있으면 삭제, 없으면 그대로 성공 반환 (멱등)
+      var likeOpt = likeRepository.findPostLikeByUserId(userId, postId);
+      if (likeOpt.isPresent()) {
+          likeRepository.delete(likeOpt.get());
+          postRepository.decrementLikeCount(postId);
 
-    // 3. 좋아요 삭제
-    likeRepository.delete(like);
+          int likeCount = Math.max(0, post.getLikeCount() - 1);
+          log.info("게시글 좋아요 취소 완료 - postId: {}, likeCount: {}", postId, likeCount);
+          return LikeResponse.forPost(postId, false, likeCount);
+      }
 
-    // 4. 게시글 좋아요 수 감소
-    postRepository.decrementLikeCount(postId);
-
-    // 5. 현재 좋아요 수 계산
-    int likeCount = Math.max(0, post.getLikeCount() - 1);
-
-    log.info("게시글 좋아요 취소 완료 - postId: {}, likeCount: {}", postId, likeCount);
-
-    return LikeResponse.forPost(postId, false, likeCount);
+      return LikeResponse.forPost(postId, false, post.getLikeCount());
   }
 
   // ===== 댓글 좋아요 =====
@@ -129,10 +125,10 @@ public class LikeService {
     var comment = commentRepository.findByIdAndIsDeletedFalse(commentId)
         .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-    // 2. 중복 좋아요 확인
-    if (likeRepository.existsCommentLikeByUserId(userId, commentId)) {
-      throw new DuplicateLikeException("이미 좋아요한 댓글입니다.");
-    }
+      // 2. 이미 좋아요 상태면 그대로 성공 반환 (멱등)
+      if (likeRepository.existsCommentLikeByUserId(userId, commentId)) {
+          return LikeResponse.forComment(commentId, true, comment.getLikeCount());
+      }
 
     // 3. 사용자 조회
     User user = userRepository.getReferenceById(userId);
@@ -167,22 +163,18 @@ public class LikeService {
     var comment = commentRepository.findByIdAndIsDeletedFalse(commentId)
         .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-    // 2. 좋아요 기록 확인
-    Like like = likeRepository.findCommentLikeByUserId(userId, commentId)
-        .orElseThrow(() -> new LikeNotFoundException("좋아요하지 않은 댓글입니다."));
+      // 2. 좋아요 기록 있으면 삭제, 없으면 그대로 성공 반환 (멱등)
+      var likeOpt = likeRepository.findCommentLikeByUserId(userId, commentId);
+      if (likeOpt.isPresent()) {
+          likeRepository.delete(likeOpt.get());
+          commentRepository.decrementLikeCount(commentId);
 
-    // 3. 좋아요 삭제
-    likeRepository.delete(like);
+          int likeCount = Math.max(0, comment.getLikeCount() - 1);
+          log.info("댓글 좋아요 취소 완료 - commentId: {}, likeCount: {}", commentId, likeCount);
+          return LikeResponse.forComment(commentId, false, likeCount);
+      }
 
-    // 4. 댓글 좋아요 수 감소
-    commentRepository.decrementLikeCount(commentId);
-
-    // 5. 현재 좋아요 수 계산
-    int likeCount = Math.max(0, comment.getLikeCount() - 1);
-
-    log.info("댓글 좋아요 취소 완료 - commentId: {}, likeCount: {}", commentId, likeCount);
-
-    return LikeResponse.forComment(commentId, false, likeCount);
+      return LikeResponse.forComment(commentId, false, comment.getLikeCount());
   }
 
   // ===== 좋아요 여부 확인 =====

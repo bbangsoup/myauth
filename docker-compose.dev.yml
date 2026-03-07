@@ -59,7 +59,7 @@ services:
 
     # 독립적인 네트워크에 연결
     networks:
-      - myauth-network
+      - auth-network
 
     # 재시작 정책: 수동 중지하지 않는 한 항상 재시작
     restart: unless-stopped
@@ -70,7 +70,7 @@ services:
 networks:
   # 독립적인 네트워크 (myauth 프로젝트 전용)
   # 기존 mysql-8 컨테이너도 이 네트워크에 연결되어야 함
-  myauth-network:
+  auth-network:
     driver: bridge
     name: myauth-network
 
