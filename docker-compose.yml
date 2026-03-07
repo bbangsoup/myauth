@@ -40,15 +40,17 @@ services:
       # Spring 프로파일
       SPRING_PROFILES_ACTIVE: dev
 
-    # 네트워크 설정 (mysql-8과 같은 네트워크 사용)
-    network_mode: bridge
-
-    # 의존성 (mysql-8이 실행 중이어야 함)
-    external_links:
-      - mysql-8
+    # auth-network 참여
+    networks:
+      - auth-network
 
     # 재시작 정책
     restart: unless-stopped
+
+networks:
+  auth-network:
+    driver: bridge
+    name: auth-network
 
 # ================================================
 # 사용 방법

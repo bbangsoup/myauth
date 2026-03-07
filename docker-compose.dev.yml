@@ -72,7 +72,7 @@ networks:
   # 기존 mysql-8 컨테이너도 이 네트워크에 연결되어야 함
   auth-network:
     driver: bridge
-    name: myauth-network
+    name: auth-network
 
 # ========================================
 # 볼륨 정의
