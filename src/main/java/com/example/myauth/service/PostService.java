@@ -7,11 +7,11 @@ import com.example.myauth.exception.PostNotFoundException;
 import com.example.myauth.exception.UnauthorizedAccessException;
 import com.example.myauth.repository.PostImageRepository;
 import com.example.myauth.repository.PostRepository;
+import com.example.myauth.repository.PostViewRepository;
 import com.example.myauth.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 게시글 서비스
@@ -34,6 +32,7 @@ public class PostService {
 
   private final PostRepository postRepository;
   private final PostImageRepository postImageRepository;
+  private final PostViewRepository postViewRepository;
   private final UserRepository userRepository;
   private final ImageStorageService imageStorageService;
   private final HashtagService hashtagService;
@@ -214,7 +213,7 @@ public class PostService {
    * @return 게시글 상세 응답
    */
   @Transactional
-  public PostResponse getPost(Long userId, Long postId, HttpServletRequest request) {
+  public PostResponse getPost(Long userId, Long postId) {
     log.info("게시글 상세 조회 - userId: {}, postId: {}", userId, postId);
 
     // 1. 게시글 조회 (작성자, 이미지 함께 로드)
@@ -226,8 +225,8 @@ public class PostService {
       throw new UnauthorizedAccessException("이 게시글을 볼 수 있는 권한이 없습니다.");
     }
 
-    // 3. 조회수 증가 (작성자 본인 제외, 세션당 게시글 1회)
-    if (!post.getUser().getId().equals(userId) && shouldIncreaseViewCount(request, postId)) {
+    // 3. 조회수 증가 (작성자 본인 제외, 사용자당 게시글 1회)
+    if (!post.getUser().getId().equals(userId) && shouldIncreaseViewCount(userId, post)) {
       postRepository.incrementViewCount(postId);
       post.incrementViewCount();
     }
@@ -311,21 +310,22 @@ public class PostService {
     return getPostsByUser(userId, pageable);
   }
 
-  private boolean shouldIncreaseViewCount(HttpServletRequest request, Long postId) {
-    HttpSession session = request.getSession(true);
-    @SuppressWarnings("unchecked")
-    Set<Long> viewedPostIds = (Set<Long>) session.getAttribute("viewedPostIds");
-
-    if (viewedPostIds == null) {
-      viewedPostIds = new HashSet<>();
-      session.setAttribute("viewedPostIds", viewedPostIds);
-    }
-
-    if (viewedPostIds.contains(postId)) {
+  private boolean shouldIncreaseViewCount(Long userId, Post post) {
+    if (postViewRepository.existsByViewerIdAndPostId(userId, post.getId())) {
       return false;
     }
 
-    viewedPostIds.add(postId);
-    return true;
+    try {
+      postViewRepository.save(
+          PostView.builder()
+              .viewer(User.builder().id(userId).build())
+              .post(post)
+              .build()
+      );
+      return true;
+    } catch (DataIntegrityViolationException e) {
+      // 동시 요청으로 유니크 키 충돌이 난 경우, 이미 조회 처리된 것으로 간주
+      return false;
+    }
   }
 }

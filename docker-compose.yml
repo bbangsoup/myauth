@@ -39,6 +39,12 @@ services:
 
       # Spring 프로파일
       SPRING_PROFILES_ACTIVE: dev
+      FILE_UPLOAD_DIR: /app/uploads
+      FILE_UPLOAD_BASE_URL: http://localhost:9080/uploads
+
+    # 업로드 파일 영구 보존
+    volumes:
+      - myauth-upload-data:/app/uploads
 
     # auth-network 참여
     networks:
@@ -51,6 +57,11 @@ networks:
   auth-network:
     driver: bridge
     name: auth-network
+
+volumes:
+  myauth-upload-data:
+    driver: local
+    name: myauth-upload-data
 
 # ================================================
 # 사용 방법

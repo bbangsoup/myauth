@@ -160,12 +160,11 @@ public class PostController {
   @GetMapping("/{id}")
   public ResponseEntity<ApiResponse<PostResponse>> getPost(
       @AuthenticationPrincipal User user,
-      HttpServletRequest request,
       @PathVariable Long id
   ) {
     log.info("寃뚯떆湲 ?곸꽭 議고쉶 ?붿껌 - userId: {}, postId: {}", user.getId(), id);
 
-    PostResponse response = postService.getPost(user.getId(), id, request);
+    PostResponse response = postService.getPost(user.getId(), id);
 
     return ResponseEntity.ok(ApiResponse.success("寃뚯떆湲 議고쉶 ?깃났", response));
   }
