@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * - 좋아요 누른 사용자 목록 조회
  */
 @Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class LikeService {
