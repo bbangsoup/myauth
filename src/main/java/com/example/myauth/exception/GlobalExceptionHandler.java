@@ -16,22 +16,22 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
- * 전역 예외 처리 핸들러
- * 모든 @RestController에서 발생하는 예외를 한 곳에서 처리한다
+ * ?꾩뿭 ?덉쇅 泥섎━ ?몃뱾??
+ * 紐⑤뱺 @RestController?먯꽌 諛쒖깮?섎뒗 ?덉쇅瑜???怨녹뿉??泥섎━?쒕떎
  */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
   /**
-   * 인증 실패 예외 처리
-   * 이메일 또는 비밀번호가 올바르지 않을 때 발생
+   * ?몄쬆 ?ㅽ뙣 ?덉쇅 泥섎━
+   * ?대찓???먮뒗 鍮꾨?踰덊샇媛 ?щ컮瑜댁? ?딆쓣 ??諛쒖깮
    */
   @ExceptionHandler(InvalidCredentialsException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleInvalidCredentials(
       InvalidCredentialsException ex) {
-    log.warn("인증 실패: {}", ex.getMessage());
+    log.warn("?몄쬆 ?ㅽ뙣: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
@@ -39,14 +39,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 토큰 관련 예외 처리
-   * Refresh Token이 유효하지 않거나 만료되었을 때 발생
+   * ?좏겙 愿???덉쇅 泥섎━
+   * Refresh Token???좏슚?섏? ?딄굅??留뚮즺?섏뿀????諛쒖깮
    */
   @ExceptionHandler(TokenException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleTokenException(
       TokenException ex) {
-    log.warn("토큰 오류: {}", ex.getMessage());
+    log.warn("?좏겙 ?ㅻ쪟: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.UNAUTHORIZED)
@@ -54,14 +54,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 계정 상태 관련 예외 처리
-   * 계정이 비활성화, 정지, 삭제 등의 상태일 때 발생
+   * 怨꾩젙 ?곹깭 愿???덉쇅 泥섎━
+   * 怨꾩젙??鍮꾪솢?깊솕, ?뺤?, ??젣 ?깆쓽 ?곹깭????諛쒖깮
    */
   @ExceptionHandler(AccountException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleAccountException(
       AccountException ex) {
-    log.warn("계정 상태 오류: {}", ex.getMessage());
+    log.warn("怨꾩젙 ?곹깭 ?ㅻ쪟: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
@@ -69,14 +69,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 이메일 중복 예외 처리
-   * 회원가입 시 이미 존재하는 이메일로 가입을 시도할 때 발생
+   * ?대찓??以묐났 ?덉쇅 泥섎━
+   * ?뚯썝媛?????대? 議댁옱?섎뒗 ?대찓?쇰줈 媛?낆쓣 ?쒕룄????諛쒖깮
    */
   @ExceptionHandler(DuplicateEmailException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleDuplicateEmail(
       DuplicateEmailException ex) {
-    log.warn("이메일 중복: {}", ex.getMessage());
+    log.warn("?대찓??以묐났: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
@@ -84,14 +84,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 파일 저장/삭제 실패 예외 처리
-   * 파일 시스템 관련 IO 오류 발생 시
+   * ?뚯씪 ?????젣 ?ㅽ뙣 ?덉쇅 泥섎━
+   * ?뚯씪 ?쒖뒪??愿??IO ?ㅻ쪟 諛쒖깮 ??
    */
   @ExceptionHandler(FileStorageException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleFileStorageException(
       FileStorageException ex) {
-    log.error("파일 저장 오류: {}", ex.getMessage(), ex);
+    log.error("?뚯씪 ????ㅻ쪟: {}", ex.getMessage(), ex);
 
     return ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -99,19 +99,19 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 파일 유효성 검사 실패 예외 처리
-   * 파일이 비어있거나, 크기 초과, 지원하지 않는 형식 등
+   * ?뚯씪 ?좏슚??寃???ㅽ뙣 ?덉쇅 泥섎━
+   * ?뚯씪??鍮꾩뼱?덇굅?? ?ш린 珥덇낵, 吏?먰븯吏 ?딅뒗 ?뺤떇 ??
    */
   @ExceptionHandler(InvalidFileException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleInvalidFileException(
       InvalidFileException ex) {
-    log.warn("파일 유효성 검사 실패 [{}]: {}", ex.getErrorCode(), ex.getMessage());
+    log.warn("?뚯씪 ?좏슚??寃???ㅽ뙣 [{}]: {}", ex.getErrorCode(), ex.getMessage());
 
-    // 에러 코드에 따른 HTTP 상태 코드 결정
+    // ?먮윭 肄붾뱶???곕Ⅸ HTTP ?곹깭 肄붾뱶 寃곗젙
     HttpStatus status = switch (ex.getErrorCode()) {
       case EMPTY_FILE, FILE_TOO_LARGE, UNSUPPORTED_TYPE, INVALID_FILENAME -> HttpStatus.BAD_REQUEST;
-      case INVALID_PATH -> HttpStatus.FORBIDDEN;  // 경로 조작 시도는 403
+      case INVALID_PATH -> HttpStatus.FORBIDDEN;  // 寃쎈줈 議곗옉 ?쒕룄??403
     };
 
     return ResponseEntity
@@ -120,14 +120,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 게시글을 찾을 수 없을 때 예외 처리
-   * 존재하지 않는 게시글 ID로 조회/수정/삭제 시도 시 발생
+   * 寃뚯떆湲??李얠쓣 ???놁쓣 ???덉쇅 泥섎━
+   * 議댁옱?섏? ?딅뒗 寃뚯떆湲 ID濡?議고쉶/?섏젙/??젣 ?쒕룄 ??諛쒖깮
    */
   @ExceptionHandler(PostNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handlePostNotFoundException(
       PostNotFoundException ex) {
-    log.warn("게시글 조회 실패: {}", ex.getMessage());
+    log.warn("寃뚯떆湲 議고쉶 ?ㅽ뙣: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -135,14 +135,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 권한 없는 접근 예외 처리
-   * 다른 사용자의 게시글 수정/삭제 시도 또는 비공개 게시글 접근 시 발생
+   * 沅뚰븳 ?녿뒗 ?묎렐 ?덉쇅 泥섎━
+   * ?ㅻⅨ ?ъ슜?먯쓽 寃뚯떆湲 ?섏젙/??젣 ?쒕룄 ?먮뒗 鍮꾧났媛?寃뚯떆湲 ?묎렐 ??諛쒖깮
    */
   @ExceptionHandler(UnauthorizedAccessException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleUnauthorizedAccessException(
       UnauthorizedAccessException ex) {
-    log.warn("권한 없는 접근 시도: {}", ex.getMessage());
+    log.warn("沅뚰븳 ?녿뒗 ?묎렐 ?쒕룄: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.FORBIDDEN)
@@ -150,14 +150,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 댓글을 찾을 수 없을 때 예외 처리
-   * 존재하지 않는 댓글 ID로 조회/수정/삭제 시도 시 발생
+   * ?볤???李얠쓣 ???놁쓣 ???덉쇅 泥섎━
+   * 議댁옱?섏? ?딅뒗 ?볤? ID濡?議고쉶/?섏젙/??젣 ?쒕룄 ??諛쒖깮
    */
   @ExceptionHandler(CommentNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleCommentNotFoundException(
       CommentNotFoundException ex) {
-    log.warn("댓글 조회 실패: {}", ex.getMessage());
+    log.warn("?볤? 議고쉶 ?ㅽ뙣: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -165,14 +165,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 중복 좋아요 예외 처리
-   * 이미 좋아요한 게시글/댓글에 다시 좋아요 시도 시 발생
+   * 以묐났 醫뗭븘???덉쇅 泥섎━
+   * ?대? 醫뗭븘?뷀븳 寃뚯떆湲/?볤????ㅼ떆 醫뗭븘???쒕룄 ??諛쒖깮
    */
   @ExceptionHandler(DuplicateLikeException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleDuplicateLikeException(
       DuplicateLikeException ex) {
-    log.warn("중복 좋아요 시도: {}", ex.getMessage());
+    log.warn("以묐났 醫뗭븘???쒕룄: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.CONFLICT)
@@ -180,14 +180,14 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 좋아요 기록 없음 예외 처리
-   * 좋아요하지 않은 게시글/댓글의 좋아요 취소 시도 시 발생
+   * 醫뗭븘??湲곕줉 ?놁쓬 ?덉쇅 泥섎━
+   * 醫뗭븘?뷀븯吏 ?딆? 寃뚯떆湲/?볤???醫뗭븘??痍⑥냼 ?쒕룄 ??諛쒖깮
    */
   @ExceptionHandler(LikeNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleLikeNotFoundException(
       LikeNotFoundException ex) {
-    log.warn("좋아요 기록 없음: {}", ex.getMessage());
+    log.warn("醫뗭븘??湲곕줉 ?놁쓬: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -195,15 +195,15 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 잘못된 인자 예외 처리
-   * 비즈니스 로직에서 유효하지 않은 인자 전달 시 발생
-   * 예: 대댓글의 대댓글 작성 시도
+   * ?섎せ???몄옄 ?덉쇅 泥섎━
+   * 鍮꾩쫰?덉뒪 濡쒖쭅?먯꽌 ?좏슚?섏? ?딆? ?몄옄 ?꾨떖 ??諛쒖깮
+   * ?? ??볤?????볤? ?묒꽦 ?쒕룄
    */
   @ExceptionHandler(IllegalArgumentException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(
       IllegalArgumentException ex) {
-    log.warn("잘못된 요청: {}", ex.getMessage());
+    log.warn("?섎せ???붿껌: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
@@ -211,13 +211,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 사용자를 찾을 수 없을 때 예외 처리
+   * ?ъ슜?먮? 李얠쓣 ???놁쓣 ???덉쇅 泥섎━
    */
   @ExceptionHandler(UserNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleUserNotFoundException(
       UserNotFoundException ex) {
-    log.warn("사용자 조회 실패: {}", ex.getMessage());
+    log.warn("?ъ슜??議고쉶 ?ㅽ뙣: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -225,13 +225,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 자기 자신 팔로우 시도 예외 처리
+   * ?먭린 ?먯떊 ?붾줈???쒕룄 ?덉쇅 泥섎━
    */
   @ExceptionHandler(SelfFollowException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleSelfFollowException(
       SelfFollowException ex) {
-    log.warn("자기 팔로우 시도: {}", ex.getMessage());
+    log.warn("?먭린 ?붾줈???쒕룄: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
@@ -239,13 +239,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 중복 팔로우 예외 처리
+   * 以묐났 ?붾줈???덉쇅 泥섎━
    */
   @ExceptionHandler(DuplicateFollowException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleDuplicateFollowException(
       DuplicateFollowException ex) {
-    log.warn("중복 팔로우 시도: {}", ex.getMessage());
+    log.warn("以묐났 ?붾줈???쒕룄: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.CONFLICT)
@@ -253,13 +253,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 팔로우 관계 없음 예외 처리
+   * ?붾줈??愿怨??놁쓬 ?덉쇅 泥섎━
    */
   @ExceptionHandler(FollowNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleFollowNotFoundException(
       FollowNotFoundException ex) {
-    log.warn("팔로우 관계 없음: {}", ex.getMessage());
+    log.warn("?붾줈??愿怨??놁쓬: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -267,13 +267,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 중복 북마크 예외 처리
+   * 以묐났 遺곷쭏???덉쇅 泥섎━
    */
   @ExceptionHandler(DuplicateBookmarkException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleDuplicateBookmarkException(
       DuplicateBookmarkException ex) {
-    log.warn("중복 북마크 시도: {}", ex.getMessage());
+    log.warn("以묐났 遺곷쭏???쒕룄: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.CONFLICT)
@@ -281,13 +281,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 북마크 없음 예외 처리
+   * 遺곷쭏???놁쓬 ?덉쇅 泥섎━
    */
   @ExceptionHandler(BookmarkNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleBookmarkNotFoundException(
       BookmarkNotFoundException ex) {
-    log.warn("북마크 없음: {}", ex.getMessage());
+    log.warn("遺곷쭏???놁쓬: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -295,13 +295,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 해시태그 없음 예외 처리
+   * ?댁떆?쒓렇 ?놁쓬 ?덉쇅 泥섎━
    */
   @ExceptionHandler(HashtagNotFoundException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleHashtagNotFoundException(
       HashtagNotFoundException ex) {
-    log.warn("해시태그 없음: {}", ex.getMessage());
+    log.warn("?댁떆?쒓렇 ?놁쓬: {}", ex.getMessage());
 
     return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
@@ -309,26 +309,81 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Bean Validation 검증 실패 시 처리
-   * Controller에서 @Valid 어노테이션으로 검증 실패한 경우 발생하는 예외를 처리한다
+   * Bean Validation 寃利??ㅽ뙣 ??泥섎━
+   * Controller?먯꽌 @Valid ?대끂?뚯씠?섏쑝濡?寃利??ㅽ뙣??寃쎌슦 諛쒖깮?섎뒗 ?덉쇅瑜?泥섎━?쒕떎
    *
-   * @param ex 검증 실패 예외 객체
-   * @return 첫 번째 에러 메시지를 포함한 ApiResponse
+   * @param ex 寃利??ㅽ뙣 ?덉쇅 媛앹껜
+   * @return 泥?踰덉㎏ ?먮윭 硫붿떆吏瑜??ы븿??ApiResponse
    */
+  /**
+   * DM 방 없음 예외 처리
+   */
+  @ExceptionHandler(DmRoomNotFoundException.class)
+  @SuppressWarnings("NullableProblems")
+  public ResponseEntity<ApiResponse<Void>> handleDmRoomNotFoundException(
+      DmRoomNotFoundException ex) {
+    log.warn("DM 방 조회 실패: {}", ex.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.NOT_FOUND)
+        .body(ApiResponse.error(ex.getMessage()));
+  }
+
+  /**
+   * DM 접근 거부 예외 처리
+   */
+  @ExceptionHandler(DmAccessDeniedException.class)
+  @SuppressWarnings("NullableProblems")
+  public ResponseEntity<ApiResponse<Void>> handleDmAccessDeniedException(
+      DmAccessDeniedException ex) {
+    log.warn("DM 접근 거부: {}", ex.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.FORBIDDEN)
+        .body(ApiResponse.error(ex.getMessage()));
+  }
+
+  /**
+   * DM 정책 위반 예외 처리
+   */
+  @ExceptionHandler(DmPolicyViolationException.class)
+  @SuppressWarnings("NullableProblems")
+  public ResponseEntity<ApiResponse<Void>> handleDmPolicyViolationException(
+      DmPolicyViolationException ex) {
+    log.warn("DM 정책 위반: {}", ex.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.error(ex.getMessage()));
+  }
+
+  /**
+   * DM 메시지 검증 실패 예외 처리
+   */
+  @ExceptionHandler(DmMessageValidationException.class)
+  @SuppressWarnings("NullableProblems")
+  public ResponseEntity<ApiResponse<Void>> handleDmMessageValidationException(
+      DmMessageValidationException ex) {
+    log.warn("DM 메시지 검증 실패: {}", ex.getMessage());
+
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(ApiResponse.error(ex.getMessage()));
+  }
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  @SuppressWarnings("NullableProblems")  // ApiResponse는 항상 non-null을 반환하므로 경고 억제
+  @SuppressWarnings("NullableProblems")  // ApiResponse????긽 non-null??諛섑솚?섎?濡?寃쎄퀬 ?듭젣
   public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(
       MethodArgumentNotValidException ex) {
 
-    // 첫 번째 에러 메시지만 반환
+    // 泥?踰덉㎏ ?먮윭 硫붿떆吏留?諛섑솚
     String errorMessage = ex.getBindingResult()
         .getAllErrors()
         .stream()
         .findFirst()
         .map(ObjectError::getDefaultMessage)
-        .orElse("입력값이 올바르지 않습니다.");
+        .orElse("?낅젰媛믪씠 ?щ컮瑜댁? ?딆뒿?덈떎.");
 
-    log.warn("입력값 검증 실패: {}", errorMessage);
+    log.warn("?낅젰媛?寃利??ㅽ뙣: {}", errorMessage);
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
@@ -336,13 +391,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * HTTP 요청 body 읽기 실패 시 처리
-   * - 요청 body가 비어있거나 필수인데 없는 경우
-   * - JSON 파싱 실패 (잘못된 JSON 형식)
-   * - Content-Type과 실제 body 내용이 일치하지 않는 경우
+   * HTTP ?붿껌 body ?쎄린 ?ㅽ뙣 ??泥섎━
+   * - ?붿껌 body媛 鍮꾩뼱?덇굅???꾩닔?몃뜲 ?녿뒗 寃쎌슦
+   * - JSON ?뚯떛 ?ㅽ뙣 (?섎せ??JSON ?뺤떇)
+   * - Content-Type怨??ㅼ젣 body ?댁슜???쇱튂?섏? ?딅뒗 寃쎌슦
    *
    * @param ex HttpMessageNotReadableException
-   * @return 사용자 친화적인 에러 메시지
+   * @return ?ъ슜??移쒗솕?곸씤 ?먮윭 硫붿떆吏
    */
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @SuppressWarnings("NullableProblems")
@@ -352,15 +407,15 @@ public class GlobalExceptionHandler {
     String errorMessage;
     String detailMessage = ex.getMessage();
 
-    // 에러 메시지 분석하여 사용자 친화적인 메시지 생성
+    // ?먮윭 硫붿떆吏 遺꾩꽍?섏뿬 ?ъ슜??移쒗솕?곸씤 硫붿떆吏 ?앹꽦
     if (detailMessage != null && detailMessage.contains("Required request body is missing")) {
-      errorMessage = "요청 body가 비어있습니다. JSON 형식의 데이터를 전송해주세요.";
+      errorMessage = "?붿껌 body媛 鍮꾩뼱?덉뒿?덈떎. JSON ?뺤떇???곗씠?곕? ?꾩넚?댁＜?몄슂.";
     } else {
-      errorMessage = "잘못된 요청 형식입니다. JSON 형식이 올바른지 확인해주세요.";
+      errorMessage = "?섎せ???붿껌 ?뺤떇?낅땲?? JSON ?뺤떇???щ컮瑜몄? ?뺤씤?댁＜?몄슂.";
     }
 
-    log.warn("HTTP 메시지 읽기 실패: {}", errorMessage);
-    log.debug("상세 에러: {}", detailMessage);
+    log.warn("HTTP 硫붿떆吏 ?쎄린 ?ㅽ뙣: {}", errorMessage);
+    log.debug("?곸꽭 ?먮윭: {}", detailMessage);
 
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
@@ -368,11 +423,11 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 지원하지 않는 Content-Type으로 요청한 경우 처리
-   * 예: application/json을 기대하는데 application/x-www-form-urlencoded로 요청
+   * 吏?먰븯吏 ?딅뒗 Content-Type?쇰줈 ?붿껌??寃쎌슦 泥섎━
+   * ?? application/json??湲곕??섎뒗??application/x-www-form-urlencoded濡??붿껌
    *
    * @param ex HttpMediaTypeNotSupportedException
-   * @return 사용자 친화적인 에러 메시지
+   * @return ?ъ슜??移쒗솕?곸씤 ?먮윭 硫붿떆吏
    */
   @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
   @SuppressWarnings("NullableProblems")
@@ -380,11 +435,11 @@ public class GlobalExceptionHandler {
       HttpMediaTypeNotSupportedException ex) {
 
     String errorMessage = String.format(
-        "지원하지 않는 Content-Type입니다. 'Content-Type: application/json' 헤더를 추가해주세요.",
+        "吏?먰븯吏 ?딅뒗 Content-Type?낅땲?? 'Content-Type: application/json' ?ㅻ뜑瑜?異붽??댁＜?몄슂.",
         ex.getContentType()
     );
 
-    log.warn("지원하지 않는 Media Type: {}", ex.getContentType());
+    log.warn("吏?먰븯吏 ?딅뒗 Media Type: {}", ex.getContentType());
 
     return ResponseEntity
         .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
@@ -392,11 +447,11 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 지원하지 않는 HTTP 메서드로 요청한 경우 처리
-   * 예: POST만 지원하는 엔드포인트에 GET 요청
+   * 吏?먰븯吏 ?딅뒗 HTTP 硫붿꽌?쒕줈 ?붿껌??寃쎌슦 泥섎━
+   * ?? POST留?吏?먰븯???붾뱶?ъ씤?몄뿉 GET ?붿껌
    *
    * @param ex HttpRequestMethodNotSupportedException
-   * @return 사용자 친화적인 에러 메시지
+   * @return ?ъ슜??移쒗솕?곸씤 ?먮윭 硫붿떆吏
    */
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
   @SuppressWarnings("NullableProblems")
@@ -405,15 +460,15 @@ public class GlobalExceptionHandler {
 
     String supportedMethods = ex.getSupportedHttpMethods() != null
         ? ex.getSupportedHttpMethods().toString()
-        : "지원되는 메서드 없음";
+        : "吏?먮릺??硫붿꽌???놁쓬";
 
     String errorMessage = String.format(
-        "%s 메서드는 지원하지 않습니다. 지원하는 메서드: %s",
+        "%s 硫붿꽌?쒕뒗 吏?먰븯吏 ?딆뒿?덈떎. 吏?먰븯??硫붿꽌?? %s",
         ex.getMethod(),
         supportedMethods
     );
 
-    log.warn("지원하지 않는 HTTP 메서드: {} (요청된 메서드), 지원: {}",
+    log.warn("吏?먰븯吏 ?딅뒗 HTTP 硫붿꽌?? {} (?붿껌??硫붿꽌??, 吏?? {}",
         ex.getMethod(), supportedMethods);
 
     return ResponseEntity
@@ -422,41 +477,41 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 트랜잭션 롤백 예외 처리
-   * @Transactional 메서드에서 예외를 catch해서 처리했지만 트랜잭션이 rollback-only로 마킹된 경우 발생
+   * ?몃옖??뀡 濡ㅻ갚 ?덉쇅 泥섎━
+   * @Transactional 硫붿꽌?쒖뿉???덉쇅瑜?catch?댁꽌 泥섎━?덉?留??몃옖??뀡??rollback-only濡?留덊궧??寃쎌슦 諛쒖깮
    *
    * @param ex UnexpectedRollbackException
-   * @return 적절한 에러 메시지
+   * @return ?곸젅???먮윭 硫붿떆吏
    */
   @ExceptionHandler(UnexpectedRollbackException.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleUnexpectedRollbackException(
       UnexpectedRollbackException ex) {
 
-    log.warn("트랜잭션 롤백 예외 발생: {}", ex.getMessage());
+    log.warn("?몃옖??뀡 濡ㅻ갚 ?덉쇅 諛쒖깮: {}", ex.getMessage());
 
-    // 원인 예외를 재귀적으로 탐색
+    // ?먯씤 ?덉쇅瑜??ш??곸쑝濡??먯깋
     Throwable cause = ex;
     while (cause != null) {
-      log.debug("예외 체인: {}", cause.getClass().getName());
+      log.debug("?덉쇅 泥댁씤: {}", cause.getClass().getName());
 
-      // DataIntegrityViolationException 발견
+      // DataIntegrityViolationException 諛쒓껄
       if (cause instanceof DataIntegrityViolationException) {
-        log.warn("데이터 무결성 제약 위반 발견: {}", cause.getMessage());
+        log.warn("?곗씠??臾닿껐???쒖빟 ?꾨컲 諛쒓껄: {}", cause.getMessage());
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(ApiResponse.error("이미 가입된 이메일입니다."));
+            .body(ApiResponse.error("?대? 媛?낅맂 ?대찓?쇱엯?덈떎."));
       }
 
       cause = cause.getCause();
     }
 
-    // DataIntegrityViolationException을 찾지 못한 경우
-    // (회원가입 시 중복 이메일 에러가 대부분이므로 기본 메시지 제공)
-    log.warn("원인 예외를 특정할 수 없지만, 중복 이메일로 추정됨");
+    // DataIntegrityViolationException??李얠? 紐삵븳 寃쎌슦
+    // (?뚯썝媛????以묐났 ?대찓???먮윭媛 ?遺遺꾩씠誘濡?湲곕낯 硫붿떆吏 ?쒓났)
+    log.warn("원인 예외를 특정하지 못했지만 중복 이메일로 추정합니다.");
     return ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
-        .body(ApiResponse.error("이미 가입된 이메일입니다."));
+        .body(ApiResponse.error("?대? 媛?낅맂 ?대찓?쇱엯?덈떎."));
   }
 
   @ExceptionHandler(NoResourceFoundException.class)
@@ -470,18 +525,18 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * 모든 예외를 처리하는 최후의 방어선
-   * 다른 ExceptionHandler에서 처리되지 않은 모든 예외를 여기서 처리한다
+   * 紐⑤뱺 ?덉쇅瑜?泥섎━?섎뒗 理쒗썑??諛⑹뼱??
+   * ?ㅻⅨ ExceptionHandler?먯꽌 泥섎━?섏? ?딆? 紐⑤뱺 ?덉쇅瑜??ш린??泥섎━?쒕떎
    *
-   * @param ex 발생한 예외 객체
-   * @return 서버 오류 메시지를 포함한 ApiResponse
+   * @param ex 諛쒖깮???덉쇅 媛앹껜
+   * @return ?쒕쾭 ?ㅻ쪟 硫붿떆吏瑜??ы븿??ApiResponse
    */
   @ExceptionHandler(Exception.class)
   @SuppressWarnings("NullableProblems")
   public ResponseEntity<ApiResponse<Void>> handleAllExceptions(Exception ex) {
-    // 스택 트레이스에서 예외 발생 위치 추출
+    // ?ㅽ깮 ?몃젅?댁뒪?먯꽌 ?덉쇅 諛쒖깮 ?꾩튂 異붿텧
     StackTraceElement[] stackTrace = ex.getStackTrace();
-    String errorLocation = "알 수 없음";
+    String errorLocation = "?????놁쓬";
 
     if (stackTrace != null && stackTrace.length > 0) {
       StackTraceElement firstElement = stackTrace[0];
@@ -491,18 +546,18 @@ public class GlobalExceptionHandler {
           firstElement.getLineNumber());
     }
 
-    // 상세한 로그 기록 (개발자용)
-    log.error("=== 예상치 못한 오류 발생 ===");
-    log.error("예외 타입: {}", ex.getClass().getName());
-    log.error("예외 메시지: {}", ex.getMessage());
-    log.error("발생 위치: {}", errorLocation);
-    log.error("전체 스택 트레이스:", ex);
+    // ?곸꽭??濡쒓렇 湲곕줉 (媛쒕컻?먯슜)
+    log.error("=== ?덉긽移?紐삵븳 ?ㅻ쪟 諛쒖깮 ===");
+    log.error("?덉쇅 ??? {}", ex.getClass().getName());
+    log.error("?덉쇅 硫붿떆吏: {}", ex.getMessage());
+    log.error("諛쒖깮 ?꾩튂: {}", errorLocation);
+    log.error("?꾩껜 ?ㅽ깮 ?몃젅?댁뒪:", ex);
     log.error("===========================");
 
-    // 클라이언트에게는 간단한 메시지만 반환 (보안상 상세 정보는 숨김)
+    // ?대씪?댁뼵?몄뿉寃뚮뒗 媛꾨떒??硫붿떆吏留?諛섑솚 (蹂댁븞???곸꽭 ?뺣낫???④?)
     return ResponseEntity
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(ApiResponse.error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."));
+        .body(ApiResponse.error("?쒕쾭 ?ㅻ쪟媛 諛쒖깮?덉뒿?덈떎. ?좎떆 ???ㅼ떆 ?쒕룄?댁＜?몄슂."));
   }
 }
 

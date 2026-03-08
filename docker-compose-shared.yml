@@ -1,12 +1,12 @@
-# ================================================
-# Docker Compose - 공유 MySQL 버전
-# 여러 프로젝트에서 같은 MySQL 사용
+﻿# ================================================
+# Docker Compose - 怨듭쑀 MySQL 踰꾩쟾
+# ?щ윭 ?꾨줈?앺듃?먯꽌 媛숈? MySQL ?ъ슜
 # ================================================
 
 version: '3.8'
 
 services:
-  # 공유 MySQL 데이터베이스
+  # 怨듭쑀 MySQL ?곗씠?곕쿋?댁뒪
   mysql:
     image: mysql:8
     container_name: shared-mysql
@@ -18,11 +18,11 @@ services:
       MYSQL_ROOT_PASSWORD: 1234
       TZ: Asia/Seoul
 
-    # 데이터 보존
+    # ?곗씠??蹂댁〈
     volumes:
       - /Users/eunbumkim/datadir:/var/lib/mysql
 
-    # 외부 네트워크 사용
+    # ?몃? ?ㅽ듃?뚰겕 ?ъ슜
     networks:
       - shared-network
 
@@ -34,7 +34,7 @@ services:
 
     restart: unless-stopped
 
-  # Spring Boot 애플리케이션
+  # Spring Boot ?좏뵆由ъ??댁뀡
   myauth:
     build:
       context: .
@@ -54,7 +54,7 @@ services:
       JWT_REFRESH_TOKEN_EXPIRATION: 604800000
       KAKAO_CLIENT_ID: f0bfa98dfa477735feeb8dbfdfa1d105
       KAKAO_CLIENT_SECRET: U4JgTAZGirCvVGmmnvuSlsoWlKFPstvV
-      KAKAO_REDIRECT_URI: http://localhost:9080/auth/kakao/callback
+      KAKAO_REDIRECT_URI: http://localhost:9080/api/auth/kakao/callback
       SPRING_PROFILES_ACTIVE: dev
       FILE_UPLOAD_DIR: /app/uploads
       FILE_UPLOAD_BASE_URL: http://localhost:9080/uploads
@@ -70,16 +70,16 @@ services:
         condition: service_healthy
 
     restart: unless-stopped
-# no             | 자동 재시작 안함 (기본값)
-# always         | 항상 재시작 (수동 중지해도 Docker 재시작 시 자동 시작)
-# on-failure     | 실패 시에만 재시작 (종료 코드 ≠ 0)
-# unless-stopped | 수동 중지하지 않는 한 항상 재시작 ⭐
+# no             | ?먮룞 ?ъ떆???덊븿 (湲곕낯媛?
+# always         | ??긽 ?ъ떆??(?섎룞 以묒??대룄 Docker ?ъ떆?????먮룞 ?쒖옉)
+# on-failure     | ?ㅽ뙣 ?쒖뿉留??ъ떆??(醫낅즺 肄붾뱶 ??0)
+# unless-stopped | ?섎룞 以묒??섏? ?딅뒗 ????긽 ?ъ떆??狩?
 
-# 외부에서도 사용 가능한 네트워크
+# ?몃??먯꽌???ъ슜 媛?ν븳 ?ㅽ듃?뚰겕
 networks:
   shared-network:
     driver: bridge
-    name: shared-network  # 명시적 이름 지정
+    name: shared-network  # 紐낆떆???대쫫 吏??
 
 volumes:
   myauth-upload-data:
@@ -87,13 +87,13 @@ volumes:
     name: myauth-upload-data
 
 # ================================================
-# 사용 방법
+# ?ъ슜 諛⑸쾿
 # ================================================
 #
-# 1. 공유 네트워크와 MySQL 시작
+# 1. 怨듭쑀 ?ㅽ듃?뚰겕? MySQL ?쒖옉
 #    docker-compose -f docker-compose-shared.yml up -d
 #
-# 2. 다른 프로젝트의 docker-compose.yml 예시:
+# 2. ?ㅻⅨ ?꾨줈?앺듃??docker-compose.yml ?덉떆:
 #
 #    version: '3.8'
 #    services:
@@ -108,9 +108,10 @@ volumes:
 #
 #    networks:
 #      shared-network:
-#        external: true  # 기존 네트워크 사용
+#        external: true  # 湲곗〈 ?ㅽ듃?뚰겕 ?ъ슜
 #
-# 3. 또는 기존 컨테이너를 네트워크에 연결:
+# 3. ?먮뒗 湲곗〈 而⑦뀒?대꼫瑜??ㅽ듃?뚰겕???곌껐:
 #    docker network connect shared-network <container-name>
 #
 # ================================================
+

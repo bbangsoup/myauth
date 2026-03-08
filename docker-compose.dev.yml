@@ -1,215 +1,216 @@
-# ================================================
-# 개발 환경 Docker Compose
-# 기존 MySQL(mysql-8) + Spring Boot 백엔드 독립 네트워크 구성
+﻿# ================================================
+# 媛쒕컻 ?섍꼍 Docker Compose
+# 湲곗〈 MySQL(mysql-8) + Spring Boot 諛깆뿏???낅┰ ?ㅽ듃?뚰겕 援ъ꽦
 # ================================================
 #
-# 특징:
-# 1. 기존에 실행 중인 mysql-8 컨테이너를 그대로 사용
-# 2. 백엔드와 MySQL이 독립적인 네트워크(myauth-network)에서 통신
-# 3. 외부에서는 포트를 통해서만 접근 가능
-# 4. 간편한 백엔드 관리 (빌드, 재시작 등)
+# ?뱀쭠:
+# 1. 湲곗〈???ㅽ뻾 以묒씤 mysql-8 而⑦뀒?대꼫瑜?洹몃?濡??ъ슜
+# 2. 諛깆뿏?쒖? MySQL???낅┰?곸씤 ?ㅽ듃?뚰겕(myauth-network)?먯꽌 ?듭떊
+# 3. ?몃??먯꽌???ы듃瑜??듯빐?쒕쭔 ?묎렐 媛??
+# 4. 媛꾪렪??諛깆뿏??愿由?(鍮뚮뱶, ?ъ떆????
 #
 # ================================================
 
 services:
 
   # ========================================
-  # Spring Boot 백엔드
+  # Spring Boot 諛깆뿏??
   # ========================================
   backend:
-    # Dockerfile을 사용하여 이미지 빌드
+    # Dockerfile???ъ슜?섏뿬 ?대?吏 鍮뚮뱶
     build:
       context: .
       dockerfile: Dockerfile
 
     container_name: myauth
 
-    # 호스트의 9080 포트와 연결 (외부 접근용)
+    # ?몄뒪?몄쓽 9080 ?ы듃? ?곌껐 (?몃? ?묎렐??
     ports:
       - "9080:9080"
 
-    # 파일 업로드 저장소 (Named Volume)
+    # ?뚯씪 ?낅줈????μ냼 (Named Volume)
     volumes:
       - upload-data:/app/uploads
 
-    # 환경 변수 설정
+    # ?섍꼍 蹂???ㅼ젙
     environment:
-      # 데이터베이스 연결 설정
-      # 기존 mysql-8 컨테이너 이름으로 접근 (같은 네트워크 내에서)
+      # ?곗씠?곕쿋?댁뒪 ?곌껐 ?ㅼ젙
+      # 湲곗〈 mysql-8 而⑦뀒?대꼫 ?대쫫?쇰줈 ?묎렐 (媛숈? ?ㅽ듃?뚰겕 ?댁뿉??
       DB_URL: jdbc:mysql://mysql-8:3306/mannal?useSSL=false&serverTimezone=Asia/Seoul&connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&allowPublicKeyRetrieval=true
       DB_USERNAME: root
       DB_PASSWORD: 1234
 
-      # JWT 토큰 설정
+      # JWT ?좏겙 ?ㅼ젙
       JWT_SECRET: mySecretKeyForJWTTokenGenerationThisKeyMustBeLongEnoughForHS512Algorithm
-      JWT_ACCESS_TOKEN_EXPIRATION: 900000     # 15분 (밀리초)
-      JWT_REFRESH_TOKEN_EXPIRATION: 3600000   # 1시간 (밀리초)
+      JWT_ACCESS_TOKEN_EXPIRATION: 900000     # 15遺?(諛由ъ큹)
+      JWT_REFRESH_TOKEN_EXPIRATION: 3600000   # 1?쒓컙 (諛由ъ큹)
 
-      # OAuth 카카오 설정
+      # OAuth 移댁뭅???ㅼ젙
       KAKAO_CLIENT_ID: f0bfa98dfa477735feeb8dbfdfa1d105
       KAKAO_CLIENT_SECRET: U4JgTAZGirCvVGmmnvuSlsoWlKFPstvV
-      KAKAO_REDIRECT_URI: http://localhost:9080/auth/kakao/callback
+      KAKAO_REDIRECT_URI: http://localhost:9080/api/auth/kakao/callback
 
-      # 파일 업로드 설정
+      # ?뚯씪 ?낅줈???ㅼ젙
       FILE_UPLOAD_DIR: /app/uploads
       FILE_UPLOAD_BASE_URL: http://localhost:9080/uploads
 
-      # Spring 프로파일 (개발 환경)
+      # Spring ?꾨줈?뚯씪 (媛쒕컻 ?섍꼍)
       SPRING_PROFILES_ACTIVE: dev
 
-    # 독립적인 네트워크에 연결
+    # ?낅┰?곸씤 ?ㅽ듃?뚰겕???곌껐
     networks:
       - auth-network
 
-    # 재시작 정책: 수동 중지하지 않는 한 항상 재시작
+    # ?ъ떆???뺤콉: ?섎룞 以묒??섏? ?딅뒗 ????긽 ?ъ떆??
     restart: unless-stopped
 
 # ========================================
-# 네트워크 정의
+# ?ㅽ듃?뚰겕 ?뺤쓽
 # ========================================
 networks:
-  # 독립적인 네트워크 (myauth 프로젝트 전용)
-  # 기존 mysql-8 컨테이너도 이 네트워크에 연결되어야 함
+  # ?낅┰?곸씤 ?ㅽ듃?뚰겕 (myauth ?꾨줈?앺듃 ?꾩슜)
+  # 湲곗〈 mysql-8 而⑦뀒?대꼫?????ㅽ듃?뚰겕???곌껐?섏뼱????
   auth-network:
     driver: bridge
     name: auth-network
 
 # ========================================
-# 볼륨 정의
+# 蹂쇰ⅷ ?뺤쓽
 # ========================================
 volumes:
-  # 파일 업로드 저장소 (Named Volume)
-  # 컨테이너를 삭제해도 데이터가 유지됨
+  # ?뚯씪 ?낅줈????μ냼 (Named Volume)
+  # 而⑦뀒?대꼫瑜???젣?대룄 ?곗씠?곌? ?좎???
   upload-data:
     driver: local
     name: myauth-upload-data
 
 # ================================================
-# 사용 방법
+# ?ъ슜 諛⑸쾿
 # ================================================
 #
-# ⚠️ 사전 준비 (최초 1회만 실행)
+# ?좑툘 ?ъ쟾 以鍮?(理쒖큹 1?뚮쭔 ?ㅽ뻾)
 # ================================================
-# 수동으로 네트워크 생성
+# ?섎룞?쇰줈 ?ㅽ듃?뚰겕 ?앹꽦
 # docker network create myauth-network
 #
-# 기존 mysql-8 컨테이너를 myauth-network에 연결
-# (이미 연결되어 있으면 "already exists" 메시지가 나오며 무시하면 됨)
+# 湲곗〈 mysql-8 而⑦뀒?대꼫瑜?myauth-network???곌껐
+# (?대? ?곌껐?섏뼱 ?덉쑝硫?"already exists" 硫붿떆吏媛 ?섏삤硫?臾댁떆?섎㈃ ??
 #
 # docker network connect myauth-network mysql-8
 #
 # ================================================
-# 서비스 실행
+# ?쒕퉬???ㅽ뻾
 # ================================================
 #
-# 1. 전체 서비스 시작 (빌드 포함)
+# 1. ?꾩껜 ?쒕퉬???쒖옉 (鍮뚮뱶 ?ы븿)
 #    docker-compose -f docker-compose.dev.yml up -d --build
 #
-# 2. 서비스 시작 (빌드 제외)
+# 2. ?쒕퉬???쒖옉 (鍮뚮뱶 ?쒖쇅)
 #    docker-compose -f docker-compose.dev.yml up -d
 #
-# 3. 로그 확인
-#    docker-compose -f docker-compose.dev.yml logs -f backend   # 백엔드 로그
-#    docker logs -f mysql-8                                     # MySQL 로그
+# 3. 濡쒓렇 ?뺤씤
+#    docker-compose -f docker-compose.dev.yml logs -f backend   # 諛깆뿏??濡쒓렇
+#    docker logs -f mysql-8                                     # MySQL 濡쒓렇
 #
-# 4. 서비스 상태 확인
+# 4. ?쒕퉬???곹깭 ?뺤씤
 #    docker-compose -f docker-compose.dev.yml ps
-#    docker ps | grep mysql-8                                   # MySQL 상태
+#    docker ps | grep mysql-8                                   # MySQL ?곹깭
 #
-# 5. 서비스 중지
+# 5. ?쒕퉬??以묒?
 #    docker-compose -f docker-compose.dev.yml stop
 #
-# 6. 서비스 재시작
+# 6. ?쒕퉬???ъ떆??
 #    docker-compose -f docker-compose.dev.yml restart
 #
-# 7. 서비스 중지 및 컨테이너 삭제 (MySQL은 그대로 유지됨)
+# 7. ?쒕퉬??以묒? 諛?而⑦뀒?대꼫 ??젣 (MySQL? 洹몃?濡??좎???
 #    docker-compose -f docker-compose.dev.yml down
 #
-# 8. 백엔드만 재빌드 및 재시작
+# 8. 諛깆뿏?쒕쭔 ?щ퉴??諛??ъ떆??
 #    docker-compose -f docker-compose.dev.yml up -d --build backend
 #
-# 9. MySQL 접속 (호스트에서)
+# 9. MySQL ?묒냽 (?몄뒪?몄뿉??
 #    mysql -h 127.0.0.1 -P 3306 -u root -p1234
 #
-# 10. MySQL 접속 (컨테이너 내부에서)
+# 10. MySQL ?묒냽 (而⑦뀒?대꼫 ?대??먯꽌)
 #     docker exec -it mysql-8 mysql -u root -p1234
 #
-# 11. 백엔드 컨테이너 내부 접속
+# 11. 諛깆뿏??而⑦뀒?대꼫 ?대? ?묒냽
 #     docker exec -it myauth-backend-dev sh
 #
-# 12. 네트워크 연결 확인
+# 12. ?ㅽ듃?뚰겕 ?곌껐 ?뺤씤
 #     docker network inspect myauth-network
-#     # mysql-8과 myauth-backend-dev가 모두 표시되어야 함
+#     # mysql-8怨?myauth-backend-dev媛 紐⑤몢 ?쒖떆?섏뼱????
 #
 # ================================================
-# 네트워크 구조
+# ?ㅽ듃?뚰겕 援ъ“
 # ================================================
 #
-#  ┌─────────────────────────────────────────────┐
-#  │      myauth-network (독립 네트워크)          │
-#  │                                             │
-#  │   ┌──────────┐            ┌──────────┐    │
-#  │   │ mysql-8  │ <--------> │ Backend  │    │
-#  │   │  :3306   │            │  :9080   │    │
-#  │   │ (기존)   │            │ (신규)   │    │
-#  │   └──────────┘            └──────────┘    │
-#  │        ↑                        ↑          │
-#  └────────┼────────────────────────┼──────────┘
-#           │                        │
-#      포트 매핑                 포트 매핑
+#  ?뚢???????????????????????????????????????????????
+#  ??     myauth-network (?낅┰ ?ㅽ듃?뚰겕)          ??
+#  ??                                            ??
+#  ??  ?뚢????????????           ?뚢????????????   ??
+#  ??  ??mysql-8  ??<--------> ??Backend  ??   ??
+#  ??  ?? :3306   ??           ?? :9080   ??   ??
+#  ??  ??(湲곗〈)   ??           ??(?좉퇋)   ??   ??
+#  ??  ?붴????????????           ?붴????????????   ??
+#  ??       ??                       ??         ??
+#  ?붴?????????쇄?????????????????????????쇄????????????
+#           ??                       ??
+#      ?ы듃 留ㅽ븨                 ?ы듃 留ㅽ븨
 #   (localhost:3306)        (localhost:9080)
-#           │                        │
-#  ┌────────▼────────────────────────▼──────────┐
-#  │              호스트 머신                     │
-#  └─────────────────────────────────────────────┘
+#           ??                       ??
+#  ?뚢?????????쇄?????????????????????????쇄????????????
+#  ??             ?몄뒪??癒몄떊                     ??
+#  ?붴???????????????????????????????????????????????
 #
-# 주요 특징:
-# - mysql-8: 기존에 실행 중이던 MySQL 컨테이너 (재사용)
-# - Backend: docker-compose로 새로 생성된 백엔드 컨테이너
-# - myauth-network 내에서 컨테이너 이름으로 통신
-#   (백엔드 → mysql-8:3306으로 접근)
-# - 외부(호스트)에서는 localhost:3306, localhost:9080으로 접근
-# - 네트워크가 독립적이므로 다른 Docker 네트워크와 격리됨
+# 二쇱슂 ?뱀쭠:
+# - mysql-8: 湲곗〈???ㅽ뻾 以묒씠??MySQL 而⑦뀒?대꼫 (?ъ궗??
+# - Backend: docker-compose濡??덈줈 ?앹꽦??諛깆뿏??而⑦뀒?대꼫
+# - myauth-network ?댁뿉??而⑦뀒?대꼫 ?대쫫?쇰줈 ?듭떊
+#   (諛깆뿏????mysql-8:3306?쇰줈 ?묎렐)
+# - ?몃?(?몄뒪???먯꽌??localhost:3306, localhost:9080?쇰줈 ?묎렐
+# - ?ㅽ듃?뚰겕媛 ?낅┰?곸씠誘濡??ㅻⅨ Docker ?ㅽ듃?뚰겕? 寃⑸━??
 #
 # ================================================
-# 환경 변수를 .env 파일로 분리하기 (선택사항)
+# ?섍꼍 蹂?섎? .env ?뚯씪濡?遺꾨━?섍린 (?좏깮?ы빆)
 # ================================================
 #
-# 1. 프로젝트 루트에 .env 파일 생성
+# 1. ?꾨줈?앺듃 猷⑦듃??.env ?뚯씪 ?앹꽦
 #
-# 2. .env 파일 내용 예시:
+# 2. .env ?뚯씪 ?댁슜 ?덉떆:
 #    DB_PASSWORD=1234
 #    JWT_SECRET=mySecretKeyForJWTTokenGenerationThisKeyMustBeLongEnoughForHS512Algorithm
 #    KAKAO_CLIENT_ID=f0bfa98dfa477735feeb8dbfdfa1d105
 #    KAKAO_CLIENT_SECRET=U4JgTAZGirCvVGmmnvuSlsoWlKFPstvV
 #
-# 3. docker-compose.dev.yml에서 사용:
+# 3. docker-compose.dev.yml?먯꽌 ?ъ슜:
 #    environment:
 #      DB_PASSWORD: ${DB_PASSWORD}
 #      JWT_SECRET: ${JWT_SECRET}
 #
-# 4. .env 파일은 .gitignore에 추가하여 Git에 커밋하지 않기
+# 4. .env ?뚯씪? .gitignore??異붽??섏뿬 Git??而ㅻ컠?섏? ?딄린
 #
 # ================================================
-# 트러블슈팅
+# ?몃윭釉붿뒋??
 # ================================================
 #
-# Q1. "포트가 이미 사용 중입니다" 오류
-# A1. 다른 MySQL이나 백엔드가 실행 중인지 확인
+# Q1. "?ы듃媛 ?대? ?ъ슜 以묒엯?덈떎" ?ㅻ쪟
+# A1. ?ㅻⅨ MySQL?대굹 諛깆뿏?쒓? ?ㅽ뻾 以묒씤吏 ?뺤씤
 #     lsof -ti:3306 | xargs kill -9
 #     lsof -ti:9080 | xargs kill -9
 #
-# Q2. MySQL 연결 실패
-# A2. MySQL 헬스체크 로그 확인
+# Q2. MySQL ?곌껐 ?ㅽ뙣
+# A2. MySQL ?ъ뒪泥댄겕 濡쒓렇 ?뺤씤
 #     docker-compose -f docker-compose.dev.yml logs mysql
 #
-# Q3. 백엔드가 MySQL을 찾지 못함
-# A3. 네트워크 확인
+# Q3. 諛깆뿏?쒓? MySQL??李얠? 紐삵븿
+# A3. ?ㅽ듃?뚰겕 ?뺤씤
 #     docker network inspect myauth-network
 #
-# Q4. 데이터가 사라졌어요
-# A4. 볼륨 확인
+# Q4. ?곗씠?곌? ?щ씪議뚯뼱??
+# A4. 蹂쇰ⅷ ?뺤씤
 #     docker volume ls | grep myauth
 #     docker volume inspect myauth-mysql-data
 #
 # ================================================
+

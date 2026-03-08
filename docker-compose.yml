@@ -3,8 +3,6 @@
 # 기존 MySQL 컨테이너(mysql-8)와 연동
 # ================================================
 
-version: '3.8'
-
 services:
   # Spring Boot 애플리케이션
   myauth:
@@ -35,7 +33,7 @@ services:
       # OAuth 카카오 설정
       KAKAO_CLIENT_ID: f0bfa98dfa477735feeb8dbfdfa1d105
       KAKAO_CLIENT_SECRET: U4JgTAZGirCvVGmmnvuSlsoWlKFPstvV
-      KAKAO_REDIRECT_URI: http://localhost:9080/auth/kakao/callback
+      KAKAO_REDIRECT_URI: http://localhost:9080/api/auth/kakao/callback
 
       # Spring 프로파일
       SPRING_PROFILES_ACTIVE: dev
@@ -55,7 +53,7 @@ services:
 
 networks:
   auth-network:
-    driver: bridge
+    external: true
     name: auth-network
 
 volumes:

@@ -1,9 +1,9 @@
-# ================================================
-# 애플리케이션만 실행 (MySQL 제외)
-# 중앙 MySQL 서버에 연결
+﻿# ================================================
+# ?좏뵆由ъ??댁뀡留??ㅽ뻾 (MySQL ?쒖쇅)
+# 以묒븰 MySQL ?쒕쾭???곌껐
 # ================================================
 #
-# 전제조건: dev-mysql 컨테이너가 실행 중이어야 함
+# ?꾩젣議곌굔: dev-mysql 而⑦뀒?대꼫媛 ?ㅽ뻾 以묒씠?댁빞 ??
 # docker-compose -f docker-compose-mysql-only.yml up -d
 #
 # ================================================
@@ -22,7 +22,7 @@ services:
       - "9080:9080"
 
     environment:
-      # localhost로 MySQL 연결 (dev-mysql 컨테이너의 3306 포트 사용)
+      # localhost濡?MySQL ?곌껐 (dev-mysql 而⑦뀒?대꼫??3306 ?ы듃 ?ъ슜)
       DB_URL: jdbc:mysql://localhost:3306/myauth?useSSL=false&serverTimezone=Asia/Seoul&connectionTimeZone=Asia/Seoul&forceConnectionTimeZoneToSession=true&allowPublicKeyRetrieval=true
       DB_USERNAME: root
       DB_PASSWORD: 1234
@@ -33,7 +33,7 @@ services:
 
       KAKAO_CLIENT_ID: f0bfa98dfa477735feeb8dbfdfa1d105
       KAKAO_CLIENT_SECRET: U4JgTAZGirCvVGmmnvuSlsoWlKFPstvV
-      KAKAO_REDIRECT_URI: http://localhost:9080/auth/kakao/callback
+      KAKAO_REDIRECT_URI: http://localhost:9080/api/auth/kakao/callback
 
       SPRING_PROFILES_ACTIVE: dev
       FILE_UPLOAD_DIR: /app/uploads
@@ -42,7 +42,7 @@ services:
     volumes:
       - myauth-upload-data:/app/uploads
 
-    # 호스트 네트워크 모드 (localhost로 MySQL 접근)
+    # ?몄뒪???ㅽ듃?뚰겕 紐⑤뱶 (localhost濡?MySQL ?묎렐)
     network_mode: host
 
     restart: unless-stopped
@@ -53,25 +53,26 @@ volumes:
     name: myauth-upload-data
 
 # ================================================
-# 사용 방법
+# ?ъ슜 諛⑸쾿
 # ================================================
 #
-# 1. MySQL 서버 시작 (한 번만, 다른 터미널에서)
+# 1. MySQL ?쒕쾭 ?쒖옉 (??踰덈쭔, ?ㅻⅨ ?곕??먯뿉??
 #    cd ~/development/shared-infrastructure
 #    docker-compose -f docker-compose-mysql-only.yml up -d
 #
-# 2. 데이터베이스 생성 (한 번만)
+# 2. ?곗씠?곕쿋?댁뒪 ?앹꽦 (??踰덈쭔)
 #    docker exec -it dev-mysql mysql -u root -p
 #    > CREATE DATABASE myauth;
 #    > exit;
 #
-# 3. 애플리케이션 실행
+# 3. ?좏뵆由ъ??댁뀡 ?ㅽ뻾
 #    docker-compose -f docker-compose-app-only.yml up -d
 #
-# 4. 로그 확인
+# 4. 濡쒓렇 ?뺤씤
 #    docker-compose -f docker-compose-app-only.yml logs -f
 #
-# 5. 중지 (MySQL은 계속 실행)
+# 5. 以묒? (MySQL? 怨꾩냽 ?ㅽ뻾)
 #    docker-compose -f docker-compose-app-only.yml down
 #
 # ================================================
+

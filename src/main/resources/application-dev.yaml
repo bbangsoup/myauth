@@ -1,22 +1,22 @@
 # ================================================
-# 개발 환경 설정 (application-dev.yaml)
-# 사용 방법: --spring.profiles.active=dev
+# 媛쒕컻 ?섍꼍 ?ㅼ젙 (application-dev.yaml)
+# ?ъ슜 諛⑸쾿: --spring.profiles.active=dev
 # ================================================
 
-# 서버 설정 - HTTP (개발 환경)
+# ?쒕쾭 ?ㅼ젙 - HTTP (媛쒕컻 ?섍꼍)
 server:
-  port: 9080  # HTTP 포트 (개발 환경)
+  port: 9080  # HTTP ?ы듃 (媛쒕컻 ?섍꼍)
 
-# 로깅 설정 - 개발 환경에서는 상세한 로그 출력
+# 濡쒓퉭 ?ㅼ젙 - 媛쒕컻 ?섍꼍?먯꽌???곸꽭??濡쒓렇 異쒕젰
 logging:
   level:
     root: INFO
     com.example.myauth: DEBUG
-    # Spring Security 필터 체인 디버그 로깅 (개발 환경에서만 활성화)
+    # Spring Security ?꾪꽣 泥댁씤 ?붾쾭洹?濡쒓퉭 (媛쒕컻 ?섍꼍?먯꽌留??쒖꽦??
     org.springframework.security: DEBUG
     org.springframework.security.web.DefaultSecurityFilterChain: DEBUG
 
-# JPA 설정 - 개발 환경에서는 SQL 로그 출력
+# JPA ?ㅼ젙 - 媛쒕컻 ?섍꼍?먯꽌??SQL 濡쒓렇 異쒕젰
 spring:
   jpa:
     show-sql: true
@@ -24,16 +24,16 @@ spring:
       hibernate:
         format_sql: true
 
-# 애플리케이션 커스텀 설정
+# ?좏뵆由ъ??댁뀡 而ㅼ뒪? ?ㅼ젙
 app:
-  # 쿠키 보안 설정
+  # 荑좏궎 蹂댁븞 ?ㅼ젙
   cookie:
-    secure: false  # HTTP 개발 환경에서는 false 설정
+    secure: false  # HTTP 媛쒕컻 ?섍꼍?먯꽌??false ?ㅼ젙
 
-  # CORS 허용 출처 (개발 환경)
+  # CORS ?덉슜 異쒖쿂 (媛쒕컻 ?섍꼍)
   cors:
     allowed-origins:
-      - http://localhost:5173      # Vite 개발 서버
+      - http://localhost:5173      # Vite 媛쒕컻 ?쒕쾭
       - http://localhost
 
     allowed-methods:
@@ -42,12 +42,12 @@ app:
       - PUT
       - DELETE
       - OPTIONS
-    allow-credentials: true  # 쿠키 전송 허용
+    allow-credentials: true  # 荑좏궎 ?꾩넚 ?덉슜
 
-  # OAuth 리다이렉트 설정
+  # OAuth 由щ떎?대젆???ㅼ젙
   oauth:
-    kakao-redirect-url: http://localhost:5173/oauth/callback  # 카카오 로그인 성공 후 리다이렉트할 프론트엔드 URL
+    kakao-redirect-url: http://localhost:9080/api/auth/kakao/callback  # 移댁뭅??濡쒓렇???깃났 ??由щ떎?대젆?명븷 ?꾨줎?몄뿏??URL
 
 
-# 개발 환경 실행
+# 媛쒕컻 ?섍꼍 ?ㅽ뻾
 # ./gradlew bootRun --args='--spring.profiles.active=dev'
