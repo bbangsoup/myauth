@@ -3,17 +3,19 @@ package com.example.myauth.controller;
 import com.example.myauth.dto.ApiResponse;
 import com.example.myauth.dto.dm.DmMessageCreateRequest;
 import com.example.myauth.dto.dm.DmMessageResponse;
+import com.example.myauth.dto.dm.DmMessageSliceResponse;
 import com.example.myauth.dto.dm.DmRoomCreateRequest;
 import com.example.myauth.dto.dm.DmRoomDetailResponse;
 import com.example.myauth.dto.dm.DmRoomListItemResponse;
 import com.example.myauth.dto.dm.DmRoomResponse;
+import com.example.myauth.dto.dm.DmUnreadCountResponse;
 import com.example.myauth.entity.User;
 import com.example.myauth.service.DmService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,13 +35,6 @@ public class DmController {
 
   private final DmService dmService;
 
-  /**
-   * 1:1 DM 방을 생성하거나 기존 방을 조회한다.
-   *
-   * @param user 인증된 요청 사용자
-   * @param request DM 방 생성 요청 DTO
-   * @return ApiResponse<DmRoomResponse>
-   */
   @PostMapping("/rooms")
   public ResponseEntity<ApiResponse<DmRoomResponse>> createOrGetRoom(
       @AuthenticationPrincipal User user,
@@ -56,14 +51,6 @@ public class DmController {
     return ResponseEntity.status(status).body(ApiResponse.success(message, response));
   }
 
-  /**
-   * 특정 DM 방에 메시지 1건을 전송한다.
-   *
-   * @param user 인증된 발신자 사용자
-   * @param roomId 메시지를 전송할 DM 방 ID
-   * @param request 메시지 전송 요청 DTO
-   * @return ApiResponse<DmMessageResponse>
-   */
   @PostMapping("/rooms/{roomId}/messages")
   public ResponseEntity<ApiResponse<DmMessageResponse>> sendMessage(
       @AuthenticationPrincipal User user,
@@ -77,14 +64,6 @@ public class DmController {
         .body(ApiResponse.success("메시지를 전송했습니다.", response));
   }
 
-  /**
-   * 내 DM 방 목록을 조회한다.
-   *
-   * @param user 인증된 요청 사용자
-   * @param page 페이지 번호(기본 0)
-   * @param size 페이지 크기(기본 20, 최대 100)
-   * @return ApiResponse<Page<DmRoomListItemResponse>>
-   */
   @GetMapping("/rooms")
   public ResponseEntity<ApiResponse<Page<DmRoomListItemResponse>>> getMyRooms(
       @AuthenticationPrincipal User user,
@@ -95,13 +74,14 @@ public class DmController {
     return ResponseEntity.ok(ApiResponse.success("DM 방 목록을 조회했습니다.", response));
   }
 
-  /**
-   * DM 방 상세(대화 상대 정보 포함)를 조회한다.
-   *
-   * @param user 인증된 요청 사용자
-   * @param roomId DM 방 ID
-   * @return ApiResponse<DmRoomDetailResponse>
-   */
+  @GetMapping("/unread-count")
+  public ResponseEntity<ApiResponse<DmUnreadCountResponse>> getUnreadCount(
+      @AuthenticationPrincipal User user
+  ) {
+    DmUnreadCountResponse response = dmService.getUnreadCount(user.getId());
+    return ResponseEntity.ok(ApiResponse.success("미읽음 DM 개수를 조회했습니다.", response));
+  }
+
   @GetMapping("/rooms/{roomId}")
   public ResponseEntity<ApiResponse<DmRoomDetailResponse>> getRoomDetail(
       @AuthenticationPrincipal User user,
@@ -111,15 +91,17 @@ public class DmController {
     return ResponseEntity.ok(ApiResponse.success("DM 방 정보를 조회했습니다.", response));
   }
 
-  /**
-   * DM 메시지 목록을 조회한다. (커서 기반 beforeId)
-   *
-   * @param user 인증된 요청 사용자
-   * @param roomId DM 방 ID
-   * @param beforeId 해당 ID보다 작은 메시지를 조회할 커서
-   * @param size 조회 개수(기본 30, 최대 100)
-   * @return ApiResponse<Slice<DmMessageResponse>>
-   */
+  @GetMapping("/rooms/{roomId}/messages-with-unread")
+  public ResponseEntity<ApiResponse<DmMessageSliceResponse>> getMessagesWithUnread(
+      @AuthenticationPrincipal User user,
+      @PathVariable Long roomId,
+      @RequestParam(required = false) Long beforeId,
+      @RequestParam(defaultValue = "30") int size
+  ) {
+    DmMessageSliceResponse response = dmService.getMessagesWithUnreadMeta(user.getId(), roomId, beforeId, size);
+    return ResponseEntity.ok(ApiResponse.success("DM 메시지 목록과 미읽음 정보를 조회했습니다.", response));
+  }
+
   @GetMapping("/rooms/{roomId}/messages")
   public ResponseEntity<ApiResponse<Slice<DmMessageResponse>>> getMessages(
       @AuthenticationPrincipal User user,

@@ -20,4 +20,5 @@ public class DmRoomListItemResponse {
   private Long lastMessageId;
   private String lastMessagePreview;
   private LocalDateTime lastMessageAt;
+  private Long unreadCount;
 }

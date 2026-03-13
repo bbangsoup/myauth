@@ -43,7 +43,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
       # none : 실제 Database에 아무런 영향을 주지 않음, 테이블 생성 자동화 없음
       # validate: 엔티티와 테이블 구조가 일치하는지 검증만 함, 수정하지 않음, 일치하지 않으면 예외발생
       # update : 엔티티 변경사항을 기반으로 DB테이블을 자동으로 업데이트함, 컬럼 삭제 안됨, 기존데이터 유지
