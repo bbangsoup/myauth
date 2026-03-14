@@ -20,9 +20,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Spring Security 설정
- * - JWT 기반 인증 사용 (세션 사용 안 함)
- * - 경로별 인증 규칙 설정
+ * Spring Security ?ㅼ젙
+ * - JWT 湲곕컲 ?몄쬆 ?ъ슜 (?몄뀡 ?ъ슜 ????
+ * - 寃쎈줈蹂??몄쬆 洹쒖튃 ?ㅼ젙
  */
 @Configuration
 @EnableWebSecurity
@@ -34,7 +34,7 @@ public class SecurityConfig {
   private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
   /**
-   * 비밀번호 암호화에 사용할 PasswordEncoder
+   * 鍮꾨?踰덊샇 ?뷀샇?붿뿉 ?ъ슜??PasswordEncoder
    */
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -42,11 +42,11 @@ public class SecurityConfig {
   }
 
   /**
-   * Spring Security의 표준 인증 관리자
-   * 사용자 인증을 처리하는 핵심 컴포넌트
-   * - UserDetailsService를 통해 사용자 정보 로드
-   * - PasswordEncoder를 통해 비밀번호 검증
-   * - 계정 상태 확인 (활성화, 잠금, 만료 등)
+   * Spring Security???쒖? ?몄쬆 愿由ъ옄
+   * ?ъ슜???몄쬆??泥섎━?섎뒗 ?듭떖 而댄룷?뚰듃
+   * - UserDetailsService瑜??듯빐 ?ъ슜???뺣낫 濡쒕뱶
+   * - PasswordEncoder瑜??듯빐 鍮꾨?踰덊샇 寃利?
+   * - 怨꾩젙 ?곹깭 ?뺤씤 (?쒖꽦?? ?좉툑, 留뚮즺 ??
    */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -54,64 +54,66 @@ public class SecurityConfig {
   }
 
   /**
-   * Spring Security 필터 체인 설정
+   * Spring Security ?꾪꽣 泥댁씤 ?ㅼ젙
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        // 1️⃣ CSRF 비활성화 (JWT 사용 시 불필요)
+        // 1截뤴깵 CSRF 鍮꾪솢?깊솕 (JWT ?ъ슜 ??遺덊븘??
         .csrf(AbstractHttpConfigurer::disable)
 
-        // 2️⃣ 폼 로그인 비활성화
+        // 2截뤴깵 ??濡쒓렇??鍮꾪솢?깊솕
         .formLogin(AbstractHttpConfigurer::disable)
 
-        // 3️⃣ HTTP Basic 인증 비활성화
+        // 3截뤴깵 HTTP Basic ?몄쬆 鍮꾪솢?깊솕
         .httpBasic(AbstractHttpConfigurer::disable)
 
-        // 4️⃣ 세션 사용 안 함 (JWT 사용)
+        // 4截뤴깵 ?몄뀡 ?ъ슜 ????(JWT ?ъ슜)
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        // 5️⃣ 로그아웃 설정
+        // 5截뤴깵 濡쒓렇?꾩썐 ?ㅼ젙
         .logout(logout -> logout
-            .logoutUrl("/logout")  // 로그아웃 URL
-            .addLogoutHandler(customLogoutHandler)  // 커스텀 로그아웃 핸들러 (Refresh Token 삭제)
-            .logoutSuccessHandler(customLogoutSuccessHandler)  // 커스텀 성공 핸들러 (JSON 응답)
-            .permitAll()  // 로그아웃 URL은 인증 없이 접근 가능
+            .logoutUrl("/logout")  // 濡쒓렇?꾩썐 URL
+            .addLogoutHandler(customLogoutHandler)  // 而ㅼ뒪? 濡쒓렇?꾩썐 ?몃뱾??(Refresh Token ??젣)
+            .logoutSuccessHandler(customLogoutSuccessHandler)  // 而ㅼ뒪? ?깃났 ?몃뱾??(JSON ?묐떟)
+            .permitAll()  // 濡쒓렇?꾩썐 URL? ?몄쬆 ?놁씠 ?묎렐 媛??
         )
 
-        // 6️⃣ 경로별 인증 규칙 설정
+        // 6截뤴깵 寃쎈줈蹂??몄쬆 洹쒖튃 ?ㅼ젙
         .authorizeHttpRequests(auth ->
             auth
-                // 인증 없이 접근 가능한 경로
+                // ?몄쬆 ?놁씠 ?묎렐 媛?ν븳 寃쎈줈
                 .requestMatchers("/health", "/signup", "/login", "/loginEx", "/refresh").permitAll()
-                // /api 접두사가 붙은 경로도 허용 (프론트엔드 호환성)
+                // /api ?묐몢?ш? 遺숈? 寃쎈줈???덉슜 (?꾨줎?몄뿏???명솚??
                 .requestMatchers("/api/health", "/api/signup", "/api/login", "/api/loginEx", "/api/refresh").permitAll()
-                // 카카오 OAuth 로그인 경로 (인증 불필요)
+                // 移댁뭅??OAuth 濡쒓렇??寃쎈줈 (?몄쬆 遺덊븘??
                 .requestMatchers("/auth/kakao/**", "/api/auth/kakao/**").permitAll()
-                // 업로드된 이미지 파일 접근 (인증 불필요 - 공개 리소스)
+                // ?낅줈?쒕맂 ?대?吏 ?뚯씪 ?묎렐 (?몄쬆 遺덊븘??- 怨듦컻 由ъ냼??
                 .requestMatchers("/uploads/**").permitAll()
-                // 그 외 모든 요청은 인증 필요
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                // 洹???紐⑤뱺 ?붿껌? ?몄쬆 ?꾩슂
                 .anyRequest().authenticated()
         )
         .exceptionHandling(ex -> ex
-            // 인증 실패 시 401 Unauthorized 반환 (기본 403 대신)
+            // ?몄쬆 ?ㅽ뙣 ??401 Unauthorized 諛섑솚 (湲곕낯 403 ???
             .authenticationEntryPoint((request, response, authException) -> {
               response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
               response.setContentType("application/json;charset=UTF-8");
-              response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"인증이 필요합니다.\"}");
+              response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"?몄쬆???꾩슂?⑸땲??\"}");
             })
-            // 권한 부족시 403 Forbidden
+            // 沅뚰븳 遺議깆떆 403 Forbidden
             .accessDeniedHandler((request, response, accessDeniedException) -> {
               response.setStatus(HttpServletResponse.SC_FORBIDDEN);
               response.setContentType("application/json;charset=UTF-8");
-              response.getWriter().write("{\"error\":\"Access Denied\", \"message\":\"권한이 없습니다.\"}");
+              response.getWriter().write("{\"error\":\"Access Denied\", \"message\":\"沅뚰븳???놁뒿?덈떎.\"}");
             })
         )
 
-        // JWT 인증 필터 추가 (UsernamePasswordAuthenticationFilter 이전에 실행)
+        // JWT ?몄쬆 ?꾪꽣 異붽? (UsernamePasswordAuthenticationFilter ?댁쟾???ㅽ뻾)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
 }
+
 

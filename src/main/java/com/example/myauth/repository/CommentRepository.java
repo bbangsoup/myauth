@@ -47,6 +47,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
       "WHERE c.id = :id AND c.isDeleted = false")
   Optional<Comment> findByIdWithUserAndPost(@Param("id") Long id);
 
+  @Query("SELECT c FROM Comment c JOIN FETCH c.user JOIN FETCH c.post WHERE c.id = :id")
+  Optional<Comment> findAnyByIdWithUserAndPost(@Param("id") Long id);
+
   // ===== 게시글별 댓글 조회 =====
 
   /**
@@ -166,4 +169,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
   @Query("UPDATE Comment c SET c.likeCount = c.likeCount - 1 " +
       "WHERE c.id = :commentId AND c.likeCount > 0")
   void decrementLikeCount(@Param("commentId") Long commentId);
+
+  long countByIsDeletedFalse();
+
+  long countByIsDeletedTrue();
+
+  long countByCreatedAtAfter(java.time.LocalDateTime after);
 }

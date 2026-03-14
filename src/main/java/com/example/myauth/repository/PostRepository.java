@@ -28,6 +28,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
    */
   Optional<Post> findByIdAndIsDeletedFalse(Long id);
 
+  @Query("SELECT p FROM Post p JOIN FETCH p.user WHERE p.id = :id")
+  Optional<Post> findAnyByIdWithUser(@Param("id") Long id);
+
   /**
    * 게시글 상세 조회 (작성자 정보 함께 로드 - N+1 방지)
    * @param id 게시글 ID
@@ -231,4 +234,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
       "AND p.visibility = 'PUBLIC' " +
       "ORDER BY p.likeCount DESC, p.createdAt DESC")
   Page<Post> findRecommendedPosts(@Param("userId") Long userId, Pageable pageable);
+
+  long countByIsDeletedFalse();
+
+  long countByIsDeletedTrue();
+
+  long countByCreatedAtAfter(java.time.LocalDateTime after);
 }

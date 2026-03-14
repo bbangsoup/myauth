@@ -149,6 +149,16 @@ public class GlobalExceptionHandler {
         .body(ApiResponse.error(ex.getMessage()));
   }
 
+  @ExceptionHandler(AdminAccessDeniedException.class)
+  @SuppressWarnings("NullableProblems")
+  public ResponseEntity<ApiResponse<Void>> handleAdminAccessDeniedException(
+      AdminAccessDeniedException ex) {
+    log.warn("Admin access denied: {}", ex.getMessage());
+    return ResponseEntity
+        .status(HttpStatus.FORBIDDEN)
+        .body(ApiResponse.error(ex.getMessage()));
+  }
+
   /**
    * ?볤???李얠쓣 ???놁쓣 ???덉쇅 泥섎━
    * 議댁옱?섏? ?딅뒗 ?볤? ID濡?議고쉶/?섏젙/??젣 ?쒕룄 ??諛쒖깮
