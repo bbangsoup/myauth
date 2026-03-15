@@ -1,5 +1,6 @@
 package com.example.myauth.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,5 +43,8 @@ public class LoginResponse {
     private String name;
     private String role;
     private String profileImage;
+    private Boolean isSuperUser;
+    @JsonProperty("is_super_user")
+    private Integer isSuperUserValue;
   }
 }

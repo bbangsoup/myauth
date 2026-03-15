@@ -26,4 +26,9 @@ public class TokenRefreshResponse {
    * 현재는 사용하지 않으므로 null
    */
   private String refreshToken;
+
+  /**
+   * 현재 사용자 정보
+   */
+  private LoginResponse.UserInfo user;
 }

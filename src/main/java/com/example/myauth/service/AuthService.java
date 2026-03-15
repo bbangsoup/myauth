@@ -147,13 +147,7 @@ public class AuthService {
     log.info("Refresh Token DB 저장 완료: {}", normalizedEmail);
 
     // 7️⃣ 로그인 성공 응답 반환
-    LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
-        .id(user.getId())
-        .email(user.getEmail())
-        .name(user.getName())
-        .role(user.getRole().name())
-        .profileImage(user.getProfileImage())
-        .build();
+    LoginResponse.UserInfo userInfo = buildUserInfo(user);
 
     log.info("로그인 성공: {}", normalizedEmail);
     return LoginResponse.builder()
@@ -214,12 +208,7 @@ public class AuthService {
     log.info("Refresh Token DB 저장 완료 (loginEx): {}", normalizedEmail);
 
     // 6️⃣ 로그인 성공 응답 반환
-    LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
-        .id(user.getId())
-        .email(user.getEmail())
-        .name(user.getName())
-        .role(user.getRole().name())
-        .build();
+    LoginResponse.UserInfo userInfo = buildUserInfo(user);
 
     log.info("로그인 성공 (loginEx): {}", normalizedEmail);
     return LoginResponse.builder()
@@ -275,6 +264,27 @@ public class AuthService {
     return TokenRefreshResponse.builder()
         .accessToken(newAccessToken)
         .refreshToken(null)  // Refresh Token Rotation 미사용
+        .user(buildUserInfo(user))
         .build();
+  }
+
+  private LoginResponse.UserInfo buildUserInfo(User user) {
+    boolean isSuperUser = Boolean.TRUE.equals(user.getIsSuperUser());
+    return LoginResponse.UserInfo.builder()
+        .id(user.getId())
+        .email(user.getEmail())
+        .name(user.getName())
+        .role(resolveResponseRole(user))
+        .profileImage(user.getProfileImage())
+        .isSuperUser(isSuperUser)
+        .isSuperUserValue(isSuperUser ? 1 : 0)
+        .build();
+  }
+
+  private String resolveResponseRole(User user) {
+    if (Boolean.TRUE.equals(user.getIsSuperUser()) || user.getRole() == User.Role.ROLE_ADMIN) {
+      return User.Role.ROLE_ADMIN.name();
+    }
+    return user.getRole().name();
   }
 }

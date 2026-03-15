@@ -40,8 +40,14 @@ public class CustomUserDetails implements UserDetails {
    */
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    // User 엔티티의 role을 GrantedAuthority로 변환
-    return List.of(new SimpleGrantedAuthority(user.getRole().name()));
+    return List.of(new SimpleGrantedAuthority(resolveAuthority(user)));
+  }
+
+  private String resolveAuthority(User user) {
+    if (Boolean.TRUE.equals(user.getIsSuperUser()) || user.getRole() == User.Role.ROLE_ADMIN) {
+      return User.Role.ROLE_ADMIN.name();
+    }
+    return user.getRole().name();
   }
 
   /**

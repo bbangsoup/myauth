@@ -105,7 +105,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (user != null && user.getIsActive()) {
       // Spring Security 인증 객체 생성
       List<SimpleGrantedAuthority> authorities = List.of(
-          new SimpleGrantedAuthority(user.getRole().name())
+          new SimpleGrantedAuthority(resolveAuthority(user))
       );
 
       UsernamePasswordAuthenticationToken authentication =
@@ -137,6 +137,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     return null;
+  }
+
+  private String resolveAuthority(User user) {
+    if (Boolean.TRUE.equals(user.getIsSuperUser()) || user.getRole() == User.Role.ROLE_ADMIN) {
+      return User.Role.ROLE_ADMIN.name();
+    }
+    return user.getRole().name();
   }
 
   /**

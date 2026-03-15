@@ -227,12 +227,15 @@ public class KakaoOAuthService {
     log.info("Refresh Token DB 저장 완료");
 
     // 4️⃣ 로그인 응답 생성
+    boolean isSuperUser = Boolean.TRUE.equals(user.getIsSuperUser());
     LoginResponse.UserInfo userInfo = LoginResponse.UserInfo.builder()
         .id(user.getId())
         .email(user.getEmail())
         .name(user.getName())
-        .role(user.getRole().name())
+        .role(resolveResponseRole(user))
         .profileImage(user.getProfileImage())
+        .isSuperUser(isSuperUser)
+        .isSuperUserValue(isSuperUser ? 1 : 0)
         .build();
 
     return LoginResponse.builder()
@@ -240,5 +243,12 @@ public class KakaoOAuthService {
         .refreshToken(refreshToken)
         .user(userInfo)
         .build();
+  }
+
+  private String resolveResponseRole(User user) {
+    if (Boolean.TRUE.equals(user.getIsSuperUser()) || user.getRole() == User.Role.ROLE_ADMIN) {
+      return User.Role.ROLE_ADMIN.name();
+    }
+    return user.getRole().name();
   }
 }

@@ -16,6 +16,12 @@ public class AdminDashboardController {
 
   private final AdminDashboardService adminDashboardService;
 
+  @GetMapping
+  public ResponseEntity<ApiResponse<AdminDashboardSummaryResponse>> getDashboard() {
+    AdminDashboardSummaryResponse response = adminDashboardService.getSummary();
+    return ResponseEntity.ok(ApiResponse.success("Admin dashboard summary fetched.", response));
+  }
+
   @GetMapping("/summary")
   public ResponseEntity<ApiResponse<AdminDashboardSummaryResponse>> getSummary() {
     AdminDashboardSummaryResponse response = adminDashboardService.getSummary();
