@@ -1,6 +1,7 @@
 package com.example.myauth.service.admin;
 
 import com.example.myauth.dto.admin.dashboard.AdminDashboardSummaryResponse;
+import com.example.myauth.dto.admin.dashboard.AdminDailyActivityResponse;
 import com.example.myauth.entity.User;
 import com.example.myauth.repository.CommentRepository;
 import com.example.myauth.repository.PostRepository;
@@ -11,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +26,10 @@ public class AdminDashboardService {
 
   @Transactional(readOnly = true)
   public AdminDashboardSummaryResponse getSummary() {
-    LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+    LocalDate today = LocalDate.now();
+    LocalDateTime startOfToday = today.atStartOfDay();
+    LocalDate trendStartDate = today.minusDays(29);
+    LocalDateTime trendStart = trendStartDate.atStartOfDay();
 
     long totalUsers = userRepository.count();
     long activeUsers = userRepository.countByStatus(User.Status.ACTIVE);
@@ -36,6 +43,22 @@ public class AdminDashboardService {
     long activeComments = commentRepository.countByIsDeletedFalse();
     long deletedComments = commentRepository.countByIsDeletedTrue();
     long totalComments = activeComments + deletedComments;
+
+    Map<String, Long> dailyUsers = toCountMap(userRepository.findCreatedAtAfter(trendStart));
+    Map<String, Long> dailyPosts = toCountMap(postRepository.findCreatedAtAfter(trendStart));
+    Map<String, Long> dailyComments = toCountMap(commentRepository.findCreatedAtAfter(trendStart));
+
+    List<AdminDailyActivityResponse> dailyStats = trendStartDate.datesUntil(today.plusDays(1))
+        .map(date -> {
+          String key = date.toString();
+          return AdminDailyActivityResponse.builder()
+              .date(key)
+              .newUsers(dailyUsers.getOrDefault(key, 0L))
+              .newPosts(dailyPosts.getOrDefault(key, 0L))
+              .newComments(dailyComments.getOrDefault(key, 0L))
+              .build();
+        })
+        .toList();
 
     return AdminDashboardSummaryResponse.builder()
         .totalUsers(totalUsers)
@@ -51,6 +74,15 @@ public class AdminDashboardService {
         .newUsersToday(userRepository.countByCreatedAtAfter(startOfToday))
         .newPostsToday(postRepository.countByCreatedAtAfter(startOfToday))
         .newCommentsToday(commentRepository.countByCreatedAtAfter(startOfToday))
+        .dailyStats(dailyStats)
         .build();
+  }
+
+  private Map<String, Long> toCountMap(List<LocalDateTime> timestamps) {
+    return timestamps.stream()
+        .collect(Collectors.groupingBy(
+            timestamp -> timestamp.toLocalDate().toString(),
+            Collectors.counting()
+        ));
   }
 }

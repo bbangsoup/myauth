@@ -14,13 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
-/**
- * 카카오 OAuth 로그인 컨트롤러
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/auth/kakao")
@@ -29,11 +33,8 @@ public class KakaoAuthController {
 
   private final KakaoOAuthService kakaoOAuthService;
   private final AppProperties appProperties;
+  private final ObjectMapper objectMapper;
 
-  /**
-   * 토큰 교환 엔드포인트
-   * 세션에 저장된 로그인 결과를 꺼내 refresh token 쿠키로 설정한다.
-   */
   @PostMapping("/exchange-token")
   public ResponseEntity<ApiResponse<LoginResponse>> exchangeToken(
       HttpServletRequest request,
@@ -69,16 +70,12 @@ public class KakaoAuthController {
         .build();
 
     response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
-
     loginResponse.setRefreshToken(null);
 
-    log.info("토큰 교환 성공 - 사용자: {}", loginResponse.getUser().getEmail());
+    log.info("토큰 교환 성공 - 사용자 {}", loginResponse.getUser().getEmail());
     return ResponseEntity.ok(ApiResponse.success("토큰 교환 성공", loginResponse));
   }
 
-  /**
-   * 카카오 로그인 시작
-   */
   @GetMapping("/login")
   public void kakaoLogin(
       @RequestParam(required = false) String redirectUrl,
@@ -97,9 +94,6 @@ public class KakaoAuthController {
     response.sendRedirect(authorizationUrl);
   }
 
-  /**
-   * 카카오 OAuth 콜백 처리
-   */
   @GetMapping("/callback")
   public void kakaoCallback(
       @RequestParam String code,
@@ -134,7 +128,6 @@ public class KakaoAuthController {
       LoginResponse loginResponse = kakaoOAuthService.processKakaoLogin(kakaoUserInfo);
 
       if (isWebClient) {
-        // 새로고침 시 access token 유실을 대비해 refresh token 쿠키를 설정한다.
         ResponseCookie refreshTokenCookie = ResponseCookie
             .from("refreshToken", loginResponse.getRefreshToken())
             .httpOnly(true)
@@ -146,16 +139,9 @@ public class KakaoAuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         log.info("웹 로그인 refreshToken 쿠키 설정 완료");
 
-        String userJson = String.format(
-            "{\"id\":%d,\"email\":\"%s\",\"name\":\"%s\",\"profileImage\":%s}",
-            loginResponse.getUser().getId(),
-            loginResponse.getUser().getEmail(),
-            loginResponse.getUser().getName(),
-            loginResponse.getUser().getProfileImage() != null
-                ? "\"" + loginResponse.getUser().getProfileImage() + "\""
-                : "null"
-        );
-        String encodedUser = java.net.URLEncoder.encode(userJson, "UTF-8");
+        // 프론트 hash user에도 role/isSuperUser/is_super_user가 포함되도록 전체 직렬화 사용
+        String userJson = objectMapper.writeValueAsString(loginResponse.getUser());
+        String encodedUser = URLEncoder.encode(userJson, StandardCharsets.UTF_8);
 
         String successRedirectUrl = String.format(
             "%s#accessToken=%s&user=%s",
@@ -169,16 +155,9 @@ public class KakaoAuthController {
       } else {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-
-        String jsonResponse = String.format(
-            "{\"success\":true,\"message\":\"카카오 로그인 성공\",\"data\":{\"accessToken\":\"%s\",\"refreshToken\":\"%s\",\"user\":{\"id\":%d,\"email\":\"%s\",\"name\":\"%s\"}}}",
-            loginResponse.getAccessToken(),
-            loginResponse.getRefreshToken(),
-            loginResponse.getUser().getId(),
-            loginResponse.getUser().getEmail(),
-            loginResponse.getUser().getName()
+        response.getWriter().write(
+            objectMapper.writeValueAsString(ApiResponse.success("카카오 로그인 성공", loginResponse))
         );
-        response.getWriter().write(jsonResponse);
       }
 
       log.info("카카오 로그인 성공: {}, 클라이언트: {}", loginResponse.getUser().getEmail(), clientType);
@@ -203,7 +182,7 @@ public class KakaoAuthController {
       String finalErrorRedirectUrl = String.format(
           "%s?error=%s",
           errorRedirectUrl,
-          java.net.URLEncoder.encode(e.getMessage(), "UTF-8")
+          URLEncoder.encode(e.getMessage(), StandardCharsets.UTF_8)
       );
       response.sendRedirect(finalErrorRedirectUrl);
     }

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -174,5 +175,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
   long countByIsDeletedTrue();
 
-  long countByCreatedAtAfter(java.time.LocalDateTime after);
+  long countByCreatedAtAfter(LocalDateTime after);
+
+  @Query("""
+      SELECT c.createdAt
+      FROM Comment c
+      WHERE c.createdAt >= :after
+      ORDER BY c.createdAt
+      """)
+  List<LocalDateTime> findCreatedAtAfter(@Param("after") LocalDateTime after);
 }

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -21,4 +23,5 @@ public class AdminDashboardSummaryResponse {
   private long newUsersToday;
   private long newPostsToday;
   private long newCommentsToday;
+  private List<AdminDailyActivityResponse> dailyStats;
 }

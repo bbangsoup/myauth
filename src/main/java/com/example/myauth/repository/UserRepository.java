@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -55,6 +56,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
   long countByIsSuperUserTrue();
 
   long countByCreatedAtAfter(LocalDateTime after);
+
+  @Query("""
+      SELECT u.createdAt
+      FROM User u
+      WHERE u.createdAt >= :after
+      ORDER BY u.createdAt
+      """)
+  List<LocalDateTime> findCreatedAtAfter(@Param("after") LocalDateTime after);
 
   @Query("""
       SELECT u

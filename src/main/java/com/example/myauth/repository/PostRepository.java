@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -239,5 +241,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
   long countByIsDeletedTrue();
 
-  long countByCreatedAtAfter(java.time.LocalDateTime after);
+  long countByCreatedAtAfter(LocalDateTime after);
+
+  @Query("""
+      SELECT p.createdAt
+      FROM Post p
+      WHERE p.createdAt >= :after
+      ORDER BY p.createdAt
+      """)
+  List<LocalDateTime> findCreatedAtAfter(@Param("after") LocalDateTime after);
 }
